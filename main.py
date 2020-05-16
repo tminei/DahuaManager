@@ -68,9 +68,7 @@ class DahuaManager:
                                 len(VideoInOptions[level0][j[0]][m][level1])
                             except:
                                 VideoInOptions[level0][j[0]][m][level1] = val
-
                     if lvlcnt == 3:
-                        print(j)
                         try:
                             len(VideoInOptions[level0][j[0]][j[1]])
                         except:
@@ -79,11 +77,6 @@ class DahuaManager:
                             len(VideoInOptions[level0][j[0]][j[1]][j[2]])
                         except:
                             VideoInOptions[level0][j[0]][j[1]][j[2]] = val
-
-
-
-
-
                 else:
                     if "[" not in j:
                         try:
@@ -102,7 +95,9 @@ class DahuaManager:
                         except:
                             VideoInOptions[level0][m][level1] = val
 
-            print(VideoInOptions)
+            return VideoInOptions
+        else:
+            return response.status_code
 
     def gMaxExtraStreamCounts(self):
         response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=getProductDefinition&name=MaxExtraStream")
@@ -187,5 +182,5 @@ mng.auth()
 # mng.gSnapshot(1, "a.png")
 
 # print(mng.gVideoInputCaps(channel=1))
-mng.gVideoInOptionsConfig()
+print(mng.gVideoInOptionsConfig())
 mng.deauth()
