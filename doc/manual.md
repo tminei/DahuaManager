@@ -90,6 +90,14 @@ q = {'0': {'AlarmDayNightColorMode': '0', 'AntiFlicker': '0', 'AutoSyncPhase': '
 Get snapshot of %channel% and save it in %filename%.
 %%channel%% can be 1,2,3 or 4.
 
+**gBasicConfig**()
+Gets the basic network settings.
+
+Example return:
+```
+{'DefaultInterface': 'eth0', 'Domain': 'dahua', 'Hostname': 'IPC', 'eth0': {'DefaultGateway': '192.168.1.1', 'DhcpEnable': 'false', 'DnsServer': {'0': '8.8.8.8', '1': '8.8.4.4'}, 'EnableDhcpReservedIP': 'false', 'IPAddress': '192.168.1.2', 'MTU': '1500', 'PhysicalAddress': 'aa:bb:cc:dd:ee:ff', 'SubnetMask': '255.255.255.0'}}
+
+```
 ### Hint
 
 All setting and receiving methods return response status code if response error (ex: return 401 if auth error)
