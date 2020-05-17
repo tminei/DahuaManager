@@ -12,11 +12,59 @@ from requests.auth import HTTPDigestAuth
 class DahuaManager:
     login = 'admin'
     password = 'admin'
-    url = "http://"
+    url = "http"
     session = requests.session()
 
     def auth(self):
         self.session.auth = HTTPDigestAuth(self.login, self.password)
+
+    def deauth(self):
+        self.session.close()
+
+    def bVideoInOptionsConfig(self, filename):
+        config = self.gVideoInOptionsConfig()
+        jsonconfig = json.dumps(config)
+        with open(filename, "w") as file:
+            file.write(jsonconfig)
+        return 0
+
+    def sBasicConfig(self, *paramList):
+        # inteface is first item in *paramList tuple; ex:(eth0, DefaultGateway, 192.168.1.1)
+        validParam = []
+        goodParam = []
+        availableParam = {
+            "baseLevel": [
+                "DefaultInterface", "Domain", "Hostname"
+            ],
+            "interfaceLevel": [
+                "DefaultGateway", "DhcpEnable", "DnsServers[0]", "DnsServers[1]", "IPAddress", "MTU", "PhysicalAddress"
+            ]
+        }
+        for param in paramList:
+            if type(param) is tuple:
+                validParam.append(param)
+        for param in validParam:
+            if len(param) == 2:
+                if param[0] in availableParam["baseLevel"]:
+                    goodParam.append(param)
+            if len(param) == 3:
+                if param[1] in availableParam["interfaceLevel"]:
+                    goodParam.append(param)
+        if len(goodParam) > 0:
+            URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig"
+
+            for i in goodParam:
+                if len(i) == 2:
+                    URL += "&Network." + i[0] + "=" + i[1]
+                if len(i) == 3:
+                    URL += "&Network." + i[0] + "." + i[1] + "=" + i[2]
+            response = self.session.get(URL)
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
+        else:
+            return 1
 
     def sColor(self, param, channel, config, value):
         available = ["brightness", "contrast", "hue", "saturation", "timeSection", "b", "c", "h", "s", "t"]
@@ -33,33 +81,12 @@ class DahuaManager:
             param = "VideoColor[" + str(channel) + "][" + str(config) + "].TimeSection"
         if param != "VideoColor[" + str(channel) + "][" + str(config) + "].TimeSection" and value not in range(0, 101):
             return 2
-        # print("/cgi-bin/configManager.cgi?action=setConfig&" + param + "=" + str(value))
         response = self.session.get(
             self.url + "/cgi-bin/configManager.cgi?action=setConfig&" + param + "=" + str(value))
         if response.status_code == 200:
             return 0
         else:
             return 1
-
-    def gVideoInputCaps(self, channel):
-        response = self.session.get(
-            self.url + "/cgi-bin/devVideoInput.cgi?action=getCaps&channel=" + str(channel))
-        if response.status_code == 200:
-            caps = {}
-            splitstr = response.text.strip().split("\r")
-            for i in splitstr:
-                print(i[i.find(".") + 1:i.find("=")])
-                caps[i[i.find(".") + 1:i.find("=")]] = i[i.find("=") + 1:]
-            return caps
-        else:
-            return response.status_code
-
-    def bVideoInOptionsConfig(self, filename):
-        config = self.gVideoInOptionsConfig()
-        jsonconfig = json.dumps(config)
-        with open(filename, "w") as file:
-            file.write(jsonconfig)
-        return 0
 
     def sVideoInOptionsConfig(self, channelNo, *paramList):
         validParam = []
@@ -81,27 +108,25 @@ class DahuaManager:
             if type(param) is tuple:
                 validParam.append(param)
 
-        for vparam in validParam:
-            if len(vparam) == 2:
-                if vparam[0] in availableParam["singleLevel"]:
-                    goodParam.append(vparam)
-            if len(vparam) == 3:
-                if vparam[0] in availableParam["capLevel"]:
-                    if vparam[0] == availableParam["capLevel"][0]:
-                        if vparam[1] in availableParam["flashControl"]:
-                            goodParam.append(vparam)
-                    elif vparam[0] == availableParam["capLevel"][1] or vparam[0] == availableParam["capLevel"][2]:
-                        if vparam[1] in availableParam["dayNight"]:
-                            goodParam.append(vparam)
+        for param in validParam:
+            if len(param) == 2:
+                if param[0] in availableParam["singleLevel"]:
+                    goodParam.append(param)
+            if len(param) == 3:
+                if param[0] in availableParam["capLevel"]:
+                    if param[0] == availableParam["capLevel"][0]:
+                        if param[1] in availableParam["flashControl"]:
+                            goodParam.append(param)
+                    elif param[0] == availableParam["capLevel"][1] or param[0] == availableParam["capLevel"][2]:
+                        if param[1] in availableParam["dayNight"]:
+                            goodParam.append(param)
         if len(goodParam) > 0:
             URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig"
-
             for i in goodParam:
                 if len(i) == 2:
                     URL += "&VideoInOptions[" + str(channelNo) + "]." + i[0] + "=" + i[1]
                 if len(i) == 3:
                     URL += "&VideoInOptions[" + str(channelNo) + "]." + i[0] + "." + i[1] + "=" + i[2]
-            print(URL)
             response = self.session.get(URL)
             if response.status_code == 200:
                 return 0
@@ -109,6 +134,19 @@ class DahuaManager:
                 return response.status_code
         else:
             return 1
+
+    def gVideoInputCaps(self, channel):
+        response = self.session.get(
+            self.url + "/cgi-bin/devVideoInput.cgi?action=getCaps&channel=" + str(channel))
+        if response.status_code == 200:
+            caps = {}
+            splitstr = response.text.strip().split("\r")
+            for i in splitstr:
+                print(i[i.find(".") + 1:i.find("=")])
+                caps[i[i.find(".") + 1:i.find("=")]] = i[i.find("=") + 1:]
+            return caps
+        else:
+            return response.status_code
 
     def gVideoInOptionsConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=VideoInOptions")
@@ -225,8 +263,44 @@ class DahuaManager:
         else:
             return response.status_code
 
-    def deauth(self):
-        self.session.close()
+    def gBasicConfig(self):
+        response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=Network")
+        if response.status_code == 200:
+            basicConfig = {}
+            raw = response.text.strip().splitlines()
+            short = []
+            for i in raw:
+                short.append(i[14:])
+            for i in short:
+                param = i[:i.find("=")]
+                val = i[i.find("=") + 1:]
+                if "." not in param:
+                    basicConfig[param] = val
+                elif "[" not in param:
+                    interface = param[:param.find(".")]
+                    try:
+                        len(basicConfig[interface])
+                    except:
+                        basicConfig[interface] = {}
+                    basicConfig[interface][param[param.find(".") + 1:i.find("=")]] = val
+                elif "[" in param:
+                    interface = param[:param.find(".")]
+                    try:
+                        len(basicConfig[interface])
+                    except:
+                        basicConfig[interface] = {}
+                    num = param[param.find("[") + 1:param.find("]")]
+                    try:
+                        len(basicConfig[interface][param[param.find(".") + 1:i.find("[") - 1]])
+                    except:
+                        basicConfig[interface][param[param.find(".") + 1:i.find("[") - 1]] = {}
+                    try:
+                        len(basicConfig[interface][param[param.find(".") + 1:i.find("[") - 1]][num])
+                    except:
+                        basicConfig[interface][param[param.find(".") + 1:i.find("[") - 1]][num] = val
+            return basicConfig
+        else:
+            return response.status_code
 
 
 mng = DahuaManager()
@@ -237,13 +311,16 @@ mng.auth()
 # mng.sColor("b", 0, 0, 100)
 # clr = mng.gColor()
 # print(clr)
-mng.gSnapshot(1, "b.png")
-mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
-                          ("Flip", "true"))
-mng.gSnapshot(1, "a.png")
-mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
-                          ("Flip", "false"))
-mng.gSnapshot(1, "a2.png")
+# mng.gSnapshot(1, "b.png")
+# mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
+#                           ("Flip", "true"))
+# mng.gSnapshot(1, "a.png")
+# mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
+#                           ("Flip", "false"))
+# mng.gSnapshot(1, "a2.png")
 # print(mng.gVideoInputCaps(channel=1))
 # mng.bVideoInOptionsConfig("test.json")
+mng.sBasicConfig(("Domain", "ddd"), ("eth0", "DnsServers[1]", "8.8.4.4"))
+
+# print(mng.gBasicConfig())
 mng.deauth()
