@@ -58,7 +58,8 @@ But the correct request must be:
 ```
 "Network.DefaultInterface" (w in lower case).
 ```
-**sNTPConfig**(self, paramList) (5.8.2)
+
+**sNTPConfig**(paramList) (5.8.2)
 Set NTP config.
 
 **Example:**
@@ -68,6 +69,31 @@ mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "2"))
 ```
 Set Address="pool.ntp.org" and TimeZone=2
 
+**sRTSPConfig**(paramList) (5.8.2)
+Set RTSP config.
+
+###ATTENTION!
+
+Before change this parametrs *RTSP.Port, RTSP.RTP.EndPort, RTSP.RTP.StartPort*, **NEED** disable RTSP:
+
+**Example:**
+```
+mng.sRTSPConfig(("Enable", "false"))
+time.sleep(1)
+cnt = 0
+while True:
+    time.sleep(1)
+    test = mng.gRTSPConfig()
+    if test['Enable'] == "false":
+        break
+    elif cnt == 3:
+        cnt = 0
+        mng.sRTSPConfig(("Enable", "false"))
+    cnt += 1
+mng.sRTSPConfig(("Port", "554"))
+mng.sRTSPConfig(("Enable", "true"))
+```
+**If the server is started, another parameters will not be changed.**
 
 ### Receiving methods
 
@@ -117,6 +143,17 @@ Get NTP config
 {'Address': 'pool.ntp.org', 'Enable': 'true', 'Port': '123', 'TimeZone': '6', 'UpdatePeriod': '10'}
 ```
 
+**gRTSPConfig**() (5.9.1)
+Get RTSP config.
+
+**Example output:**
+
+```
+table.RTSP.Enable=false
+table.RTSP.Port=554
+table.RTSP.RTP.EndPort=40000
+table.RTSP.RTP.StartPort=20000
+```
 
 ### Hint
 
