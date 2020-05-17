@@ -60,6 +60,7 @@ But the correct request must be:
 ```
 **sNTPConfig**(self, paramList) (5.8.2)
 Set NTP config.
+
 **Example:**
 
 ```
@@ -102,7 +103,7 @@ Get snapshot of %channel% and save it in %filename%.
 **gBasicConfig**() (5.2.1)
 Get the basic network setting.
 
-Example output:
+**Example output:**
 ```
 {'DefaultInterface': 'eth0', 'Domain': 'dahua', 'Hostname': 'IPC', 'eth0': {'DefaultGateway': '192.168.1.1', 'DhcpEnable': 'false', 'DnsServer': {'0': '8.8.8.8', '1': '8.8.4.4'}, 'EnableDhcpReservedIP': 'false', 'IPAddress': '192.168.1.2', 'MTU': '1500', 'PhysicalAddress': 'aa:bb:cc:dd:ee:ff', 'SubnetMask': '255.255.255.0'}}
 ```
@@ -110,7 +111,8 @@ Example output:
 **gNTPConfig**() (5.8.1)
 Get NTP config
 
-Example output:
+**Example output:**
+
 ```
 {'Address': 'pool.ntp.org', 'Enable': 'true', 'Port': '123', 'TimeZone': '6', 'UpdatePeriod': '10'}
 ```
