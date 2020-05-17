@@ -103,11 +103,9 @@ class DahuaManager:
                          "ExposureValue1", "ExposureValue2", "Gain", "GainAuto", "GainBlue", "GainGreen", "GainRed",
                          "WhiteBalance", "ReferenceLevel", "ExternalSyncPhase", "AntiFlicker", "Backlight",
                          "DayNightColor", "ExposureMode", "GlareInhibition", "Mirror", "Flip", "Rotate90"]}
-
         for param in paramList:
             if type(param) is tuple:
                 validParam.append(param)
-
         for param in validParam:
             if len(param) == 2:
                 if param[0] in availableParam["singleLevel"]:
@@ -127,6 +125,30 @@ class DahuaManager:
                     URL += "&VideoInOptions[" + str(channelNo) + "]." + i[0] + "=" + i[1]
                 if len(i) == 3:
                     URL += "&VideoInOptions[" + str(channelNo) + "]." + i[0] + "." + i[1] + "=" + i[2]
+            response = self.session.get(URL)
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
+        else:
+            return 1
+
+    def sNTPConfig(self, *paramList):
+        validParam = []
+        goodParam = []
+        availableParam = ["Address", "Enable", "Port", "TimeZone"]
+        for param in paramList:
+            if type(param) is tuple:
+                validParam.append(param)
+        for param in validParam:
+            if len(param) == 2:
+                if param[0] in availableParam:
+                    goodParam.append(param)
+        if len(goodParam) > 0:
+            URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig"
+            for i in goodParam:
+                if len(i) == 2:
+                    URL += "&NTP." + i[0] + "=" + i[1]
             response = self.session.get(URL)
             if response.status_code == 200:
                 return 0
@@ -263,6 +285,22 @@ class DahuaManager:
         else:
             return response.status_code
 
+    def gNTPConfig(self):
+        response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=NTP")
+        if response.status_code == 200:
+            NTP = {}
+            raw = response.text.strip().splitlines()
+            for i in raw:
+                name = i[i.find("NTP.") + 4:i.find("=")]
+                val = i[i.find("=") + 1:]
+                try:
+                    len(NTP[name])
+                except:
+                    NTP[name] = val
+            return NTP
+        else:
+            return response.status_code
+
     def gBasicConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=Network")
         if response.status_code == 200:
@@ -320,7 +358,8 @@ mng.auth()
 # mng.gSnapshot(1, "a2.png")
 # print(mng.gVideoInputCaps(channel=1))
 # mng.bVideoInOptionsConfig("test.json")
-mng.sBasicConfig(("Domain", "ddd"), ("eth0", "DnsServers[1]", "8.8.4.4"))
-
+# mng.sBasicConfig(("Domain", "dahua"), ("eth0", "DnsServers[1]", "8.8.4.4"))
 # print(mng.gBasicConfig())
+mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "3"))
+
 mng.deauth()
