@@ -11,7 +11,7 @@
 ### Shortening method names
 * s is set
 * g is get
-* b is buckup
+* b is backup
 * r is restore
 
 ### Description of methods
