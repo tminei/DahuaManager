@@ -1,12 +1,13 @@
-import shutil
-
+import shutil  # for save img cap (opencv heavy)
+import json  # for buckup/restore
 import requests
 from requests.auth import HTTPDigestAuth
 
 
 # s is set
 # g is get
-
+# b is backup
+# r is restore
 
 class DahuaManager:
     login = 'admin'
@@ -16,6 +17,29 @@ class DahuaManager:
 
     def auth(self):
         self.session.auth = HTTPDigestAuth(self.login, self.password)
+
+    def sColor(self, param, channel, config, value, ):
+        available = ["brightness", "contrast", "hue", "saturation", "timeSection", "b", "c", "h", "s", "t"]
+        # b, c, h, s, t is alias for brightness, contrast, hue, saturation, timeSection
+        if param not in available:
+            return 1
+        if param == "s" or param == "saturation":
+            param = "VideoColor[" + str(channel) + "][" + str(config) + "].Saturation"
+        elif param == "b" or param == "brightness":
+            param = "VideoColor[" + str(channel) + "][" + str(config) + "].Brightness"
+        elif param == "h" or param == "hue":
+            param = "VideoColor[" + str(channel) + "][" + str(config) + "].Hue"
+        elif param == "t" or param == "timeSection":
+            param = "VideoColor[" + str(channel) + "][" + str(config) + "].TimeSection"
+        if param != "VideoColor[" + str(channel) + "][" + str(config) + "].TimeSection" and value not in range(0, 101):
+            return 2
+        # print("/cgi-bin/configManager.cgi?action=setConfig&" + param + "=" + str(value))
+        response = self.session.get(
+            self.url + "/cgi-bin/configManager.cgi?action=setConfig&" + param + "=" + str(value))
+        if response.status_code == 200:
+            return 0
+        else:
+            return 1
 
     def gVideoInputCaps(self, channel):
         response = self.session.get(
@@ -29,6 +53,61 @@ class DahuaManager:
             return caps
         else:
             return response.status_code
+
+    def bVideoInOptionsConfig(self, filename):
+        config = self.gVideoInOptionsConfig()
+        jsonconfig = json.dumps(config)
+        with open(filename, "w") as file:
+            file.write(jsonconfig)
+
+    def sVideoInOptionsConfig(self, channelNo, *paramList):
+        validParam = []
+        goodParam = []
+        availableParam = {
+            "singleLevel": ["Backlight", "DayNightColor", "ExposureMode", "ExposureSpeed", "ExposureValue1",
+                            "ExposureValue2", "ExternalSync", "ExternalSyncPhase" "FlashControl", "Flip", "Gain",
+                            "GainBlue", "GainRed", "GainGreen", "GainAuto", "IrisAuto", "Mirror", "WhiteBalance",
+                            "ReferenceLevel", "Rotate90", "SignalFormat", "AntiFlicker", "GlareInhibition"],
+            "capLevel": ["FlashControl", "NightOptions", "NormalOptions"],
+            "flashControl": ["Pole", "Value", "PreValue", "Mode"],
+            "dayNight": ["BrightnessThreshold", "IrisAuto", "SunriseHour", "SunriseMinute", "SunriseSecond",
+                         "SunsetHour", "SunsetMinute", "SunsetSecond", "SwitchMode", "Profile", "ExposureSpeed",
+                         "ExposureValue1", "ExposureValue2", "Gain", "GainAuto", "GainBlue", "GainGreen", "GainRed",
+                         "WhiteBalance", "ReferenceLevel", "ExternalSyncPhase", "AntiFlicker", "Backlight",
+                         "DayNightColor", "ExposureMode", "GlareInhibition", "Mirror", "Flip", "Rotate90"]}
+
+        for param in paramList:
+            if type(param) is tuple:
+                validParam.append(param)
+
+        for vparam in validParam:
+            if len(vparam) == 2:
+                if vparam[0] in availableParam["singleLevel"]:
+                    goodParam.append(vparam)
+            if len(vparam) == 3:
+                if vparam[0] in availableParam["capLevel"]:
+                    if vparam[0] == availableParam["capLevel"][0]:
+                        if vparam[1] in availableParam["flashControl"]:
+                            goodParam.append(vparam)
+                    elif vparam[0] == availableParam["capLevel"][1] or vparam[0] == availableParam["capLevel"][2]:
+                        if vparam[1] in availableParam["dayNight"]:
+                            goodParam.append(vparam)
+        if len(goodParam) > 0:
+            URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig"
+
+            for i in goodParam:
+                if len(i) == 2:
+                    URL += "&VideoInOptions[" + str(channelNo) + "]." + i[0] + "=" + i[1]
+                if len(i) == 3:
+                    URL += "&VideoInOptions[" + str(channelNo) + "]." + i[0] + "." + i[1] + "=" + i[2]
+            print(URL)
+            response = self.session.get(URL)
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
+        else:
+            return 1
 
     def gVideoInOptionsConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=VideoInOptions")
@@ -145,28 +224,6 @@ class DahuaManager:
         else:
             return response.status_code
 
-    def sColor(self, param, channel, config, value, ):
-        available = ["brightness", "contrast", "hue", "saturation", "timeSection", "b", "c", "h", "s", "t"]
-        if param not in available:
-            return 1
-        if param == "s" or param == "saturation":
-            param = "VideoColor[" + str(channel) + "][" + str(config) + "].Saturation"
-        elif param == "b" or param == "brightness":
-            param = "VideoColor[" + str(channel) + "][" + str(config) + "].Brightness"
-        elif param == "h" or param == "hue":
-            param = "VideoColor[" + str(channel) + "][" + str(config) + "].Hue"
-        elif param == "t" or param == "timeSection":
-            param = "VideoColor[" + str(channel) + "][" + str(config) + "].TimeSection"
-        if param != "VideoColor[" + str(channel) + "][" + str(config) + "].TimeSection" and value not in range(0, 101):
-            return 2
-        # print("/cgi-bin/configManager.cgi?action=setConfig&" + param + "=" + str(value))
-        response = self.session.get(
-            self.url + "/cgi-bin/configManager.cgi?action=setConfig&" + param + "=" + str(value))
-        if response.status_code == 200:
-            return 0
-        else:
-            return 1
-
     def deauth(self):
         self.session.close()
 
@@ -179,8 +236,15 @@ mng.auth()
 # mng.sColor("b", 0, 0, 100)
 # clr = mng.gColor()
 # print(clr)
-# mng.gSnapshot(1, "a.png")
-
+mng.gSnapshot(1, "b.png")
+mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
+                          ("Flip", "true"))
+mng.gSnapshot(1, "a.png")
+mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
+                          ("Flip", "false"))
+mng.gSnapshot(1, "a2.png")
 # print(mng.gVideoInputCaps(channel=1))
-print(mng.gVideoInOptionsConfig())
+# mng.bVideoInOptionsConfig("test.json")
 mng.deauth()
+# /cgi-bin/configManager.cgi?action=setConfig&VideoInOptions[0].Flip=false
+# http://fizik.sytes.net:8080/cgi-bin/configManager.cgi?action=setConfig&VideoInOptions[0].Flip=false&VideoInOptions[0].FlashControl.Mode=0
