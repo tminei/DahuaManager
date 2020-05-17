@@ -1,8 +1,7 @@
 import shutil  # for save img cap (opencv heavy)
-import json  # for buckup/restore
+import json  # for backup/restore
 import requests
 from requests.auth import HTTPDigestAuth
-
 
 # s is set
 # g is get
@@ -27,6 +26,47 @@ class DahuaManager:
         with open(filename, "w") as file:
             file.write(jsonconfig)
         return 0
+
+    def sRTSPConfig(self, *paramList):
+        # if RTP level first param is RTP
+        validParam = []
+        goodParam = []
+        availableParam = {
+            "baseLevel": [
+                "Enable", "Port"
+            ],
+            "RTPLevel": [
+                "StartPort", "EndPort"
+            ]
+        }
+        for param in paramList:
+            if type(param) is tuple:
+                validParam.append(param)
+        for param in validParam:
+            if len(param) == 2:
+                if param[0] in availableParam["baseLevel"]:
+                    goodParam.append(param)
+            if len(param) == 3:
+                if param[0] != "RTP":
+                    continue
+                if param[1] in availableParam["RTPLevel"]:
+                    goodParam.append(param)
+        if len(goodParam) > 0:
+            URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig"
+
+            for i in goodParam:
+                if len(i) == 2:
+                    URL += "&RTSP." + i[0] + "=" + i[1]
+                if len(i) == 3:
+                    URL += "&RTSP." + i[0] + "." + i[1] + "=" + i[2]
+            # response = self.session.get(URL)
+            # if response.status_code == 200:
+            #     return 0
+            # else:
+            #     return response.status_code
+            print(URL)
+        else:
+            return 1
 
     def sBasicConfig(self, *paramList):
         # inteface is first item in *paramList tuple; ex:(eth0, DefaultGateway, 192.168.1.1)
@@ -340,6 +380,35 @@ class DahuaManager:
         else:
             return response.status_code
 
+    def gRTSPConfig(self):
+        response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=RTSP")
+        if response.status_code == 200:
+            RTSPConfig = {}
+            raw = response.text.strip().splitlines()
+            for i in raw:
+                pretty = i[11:]
+                name = pretty[:pretty.find("=")]
+                val = pretty[pretty.find("=") + 1:]
+                if "." not in name:
+                    try:
+                        len(RTSPConfig[name])
+                    except:
+                        RTSPConfig[name] = val
+                elif "." in name:
+                    firstName = name[:name.find(".")]
+                    secondName = name[name.find(".") + 1:]
+                    try:
+                        len(RTSPConfig[firstName])
+                    except:
+                        RTSPConfig[firstName] = {}
+                    try:
+                        len(RTSPConfig[firstName][secondName])
+                    except:
+                        RTSPConfig[firstName][secondName] = val
+            return RTSPConfig
+        else:
+            return response.status_code
+
 
 mng = DahuaManager()
 
@@ -360,6 +429,12 @@ mng.auth()
 # mng.bVideoInOptionsConfig("test.json")
 # mng.sBasicConfig(("Domain", "dahua"), ("eth0", "DnsServers[1]", "8.8.4.4"))
 # print(mng.gBasicConfig())
-mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "3"))
+# print(mng.gNTPConfig())
+# mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "3"))
+# print(mng.gNTPConfig())
+# mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "2"))
+# print(mng.gNTPConfig())
+# print(mng.gRTSPConfig())
+
 
 mng.deauth()
