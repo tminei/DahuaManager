@@ -38,7 +38,6 @@ sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("No
 ```
 In 0 ChannelNo set FlashControl.Mode=1; Mirror=true; NormalOptions.Rotate90=1; Flip=false
 
-
 **sBasicConfig**(paramList) (5.2.2)
 A method that allows you to change the default network settings.
 ```
@@ -59,6 +58,16 @@ But the correct request must be:
 ```
 "Network.DefaultInterface" (w in lower case).
 ```
+**sNTPConfig**(self, paramList) (5.8.2)
+Set NTP config.
+**Example:**
+
+```
+mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "2"))
+```
+Set Address="pool.ntp.org" and TimeZone=2
+
+
 ### Receiving methods
 
 **gVideoInputCaps**(channel) (4.3.1 in Dahua manual)
@@ -91,14 +100,22 @@ Get snapshot of %channel% and save it in %filename%.
 %%channel%% can be 1,2,3 or 4.
 
 **gBasicConfig**() (5.2.1)
-Gets the basic network settings.
-
+Get the basic network setting.
 
 Example output:
 ```
 {'DefaultInterface': 'eth0', 'Domain': 'dahua', 'Hostname': 'IPC', 'eth0': {'DefaultGateway': '192.168.1.1', 'DhcpEnable': 'false', 'DnsServer': {'0': '8.8.8.8', '1': '8.8.4.4'}, 'EnableDhcpReservedIP': 'false', 'IPAddress': '192.168.1.2', 'MTU': '1500', 'PhysicalAddress': 'aa:bb:cc:dd:ee:ff', 'SubnetMask': '255.255.255.0'}}
-
 ```
+
+**gNTPConfig**() (5.8.1)
+Get NTP config
+
+Example output:
+```
+{'Address': 'pool.ntp.org', 'Enable': 'true', 'Port': '123', 'TimeZone': '6', 'UpdatePeriod': '10'}
+```
+
+
 ### Hint
 
 All setting and receiving methods return response status code if response error (ex: return 401 if auth error)
