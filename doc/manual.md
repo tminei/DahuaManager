@@ -93,7 +93,7 @@ while True:
 mng.sRTSPConfig(("Port", "554"))
 mng.sRTSPConfig(("Enable", "true"))
 ```
-**If the server is started, another parameters will not be changed.**
+**If the server is started, the parameters will not be changed.**
 
 ### Receiving methods
 
