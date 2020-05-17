@@ -10,15 +10,15 @@ from requests.auth import HTTPDigestAuth
 # r is restore
 
 class DahuaManager:
-    login = '1'
-    password = '2'
-    url = "3"
+    login = 'admin'
+    password = 'admin'
+    url = "http://"
     session = requests.session()
 
     def auth(self):
         self.session.auth = HTTPDigestAuth(self.login, self.password)
 
-    def sColor(self, param, channel, config, value, ):
+    def sColor(self, param, channel, config, value):
         available = ["brightness", "contrast", "hue", "saturation", "timeSection", "b", "c", "h", "s", "t"]
         # b, c, h, s, t is alias for brightness, contrast, hue, saturation, timeSection
         if param not in available:
@@ -59,6 +59,7 @@ class DahuaManager:
         jsonconfig = json.dumps(config)
         with open(filename, "w") as file:
             file.write(jsonconfig)
+        return 0
 
     def sVideoInOptionsConfig(self, channelNo, *paramList):
         validParam = []
@@ -246,5 +247,3 @@ mng.gSnapshot(1, "a2.png")
 # print(mng.gVideoInputCaps(channel=1))
 # mng.bVideoInOptionsConfig("test.json")
 mng.deauth()
-# /cgi-bin/configManager.cgi?action=setConfig&VideoInOptions[0].Flip=false
-# http://fizik.sytes.net:8080/cgi-bin/configManager.cgi?action=setConfig&VideoInOptions[0].Flip=false&VideoInOptions[0].FlashControl.Mode=0
