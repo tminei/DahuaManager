@@ -48,7 +48,8 @@ Get video input capabilities, *channelNo* is video in channel index.
 Video in options contain Backlight, ExposureSpeed, DayNightColor. DayOptions, NightOptions, NormalOptions and so on
 
 Exampe of output(part):
-```q = {'0': {'AlarmDayNightColorMode': '0', 'AntiFlicker': '0', 'AutoSyncPhase': 'false', 'Backlight': '0',
+```
+q = {'0': {'AlarmDayNightColorMode': '0', 'AntiFlicker': '0', 'AutoSyncPhase': 'false', 'Backlight': '0',
        'BacklightRegion': {'0': '3096', '1': '3096', '2': '5096', '3': '5096'}, 'ColorTemperatureLevel': '100',
        'DayNightColor': '1', 'DayNightSensitivity': '2', 'DayNightSwitchDelay': '6', 'DoubleExposure': '0',
        'DuskOptions': {'ExternalSyncPhase': '125'}, 'ExposureCompensation': '50', 'ExposureIris': '50',
