@@ -67,7 +67,7 @@ Get video input capabilities, *channelNo* is video in channel index.
 **gVideoInOptionsConfig**() (4.3.2)
 Video in options contain Backlight, ExposureSpeed, DayNightColor. DayOptions, NightOptions, NormalOptions and so on
 
-Exampe of output(part):
+Example output(part):
 ```
 q = {'0': {'AlarmDayNightColorMode': '0', 'AntiFlicker': '0', 'AutoSyncPhase': 'false', 'Backlight': '0',
        'BacklightRegion': {'0': '3096', '1': '3096', '2': '5096', '3': '5096'}, 'ColorTemperatureLevel': '100',
@@ -90,10 +90,11 @@ q = {'0': {'AlarmDayNightColorMode': '0', 'AntiFlicker': '0', 'AutoSyncPhase': '
 Get snapshot of %channel% and save it in %filename%.
 %%channel%% can be 1,2,3 or 4.
 
-**gBasicConfig**()
+**gBasicConfig**() (5.2.1)
 Gets the basic network settings.
 
-Example return:
+
+Example output:
 ```
 {'DefaultInterface': 'eth0', 'Domain': 'dahua', 'Hostname': 'IPC', 'eth0': {'DefaultGateway': '192.168.1.1', 'DhcpEnable': 'false', 'DnsServer': {'0': '8.8.8.8', '1': '8.8.4.4'}, 'EnableDhcpReservedIP': 'false', 'IPAddress': '192.168.1.2', 'MTU': '1500', 'PhysicalAddress': 'aa:bb:cc:dd:ee:ff', 'SubnetMask': '255.255.255.0'}}
 
