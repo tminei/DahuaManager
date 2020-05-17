@@ -15,5 +15,8 @@
 * r is restore
 
 ### Description of methods
-#### auth()
-**auth()** method is needed for the authentication. You always need to start working with it and finish with the **deauth()** method.
+
+```**auth** method is needed for the authentication. 
+You always need to start working with it and finish with the deauth method.```
+
+```**sColor** (param, channel, config, value) (4.2.2 in Dahua manual) method  is used to set Brightness Contrast Hue Saturation TimeSection parametrs. You can use allias b, c, h, s and t.```
