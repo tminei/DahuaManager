@@ -31,8 +31,10 @@ You always need to start working with it and finish with the deauth method.
 Method is used to set Brightness, Contrast, Hue, Saturation, TimeSection parametrs. You can use allias b, c, h, s and t.
 
 **sVideoInOptionsConfig**(channelNo, paramList) (4.3.3)
-Allows setting the SetVideoInOptionsConfig parameters. Example:
-```sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"), ("Flip", "false"))
+Allows setting the SetVideoInOptionsConfig parameters. 
+Example:
+```
+sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"), ("Flip", "false"))
 ```
 In 0 ChannelNo set FlashControl.Mode=1; Mirror=true; NormalOptions.Rotate90=1; Flip=false
 
