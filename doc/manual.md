@@ -39,6 +39,26 @@ sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("No
 In 0 ChannelNo set FlashControl.Mode=1; Mirror=true; NormalOptions.Rotate90=1; Flip=false
 
 
+**sBasicConfig**(paramList) (5.2.2)
+A method that allows you to change the default network settings.
+```
+Comment: interface is network interface name, such as eth0, eth1...
+```
+paramList is tuples with two or three points inside:
+2 parametrs: parametr, value.
+**ex: ("Domain", "dahua")**
+
+3 parametrs: interface, parametr, value.
+**ex:(eth0, DefaultGateway, 192.168.1.1)**
+### Attachment: Dahua manual has an error:
+It says:
+```
+"NetWork.DefaultInterface"
+```
+But the correct request must be:
+```
+"Network.DefaultInterface" (w in lower case).
+```
 ### Receiving methods
 
 **gVideoInputCaps**(channel) (4.3.1 in Dahua manual)
