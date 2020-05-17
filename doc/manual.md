@@ -72,7 +72,7 @@ Get snapshot of %channel% and save it in %filename%.
 
 ### Hint
 
-All setting and receiving methods return response status code if response error (ex: its return 401 if auth error)
+All setting and receiving methods return response status code if response error (ex: return 401 if auth error)
 
 ## Examples:
 
