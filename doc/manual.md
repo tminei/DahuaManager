@@ -102,6 +102,15 @@ Change %channel% title to %name%.
 
 mng.sChannelTitleConfig("0", "Lorem ipsum dolor sit amet")
 
+
+**sMotionDetectConfig**(channelNo, paramList) (6.3.2)
+Set motion detect config.
+
+**Example:**
+
+mng.sMotionDetectConfig("0", ("Enable", "true"), ("PtzManualEnable", "true"))
+
+
 ### Receiving methods
 
 **gVideoInputCaps**(channel) (4.3.1 in Dahua manual)
@@ -179,6 +188,11 @@ print(mng.gChannelTitleConfig())
 {'0': 'Test'}
 {'0': 'Lorem ipsum dolor sit amet'}
 ```
+
+**gMotionDetectConfig**()
+Get current motion detect config:
+[Example output](https://pastebin.com/GVhNJ0vd) (Huge!)
+
 
 ### Hint
 
