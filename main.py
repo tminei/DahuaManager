@@ -129,43 +129,18 @@ class DahuaManager:
         else:
             return 1
 
-    def sVideoInOptionsConfig(self, channelNo, *paramList):
+    def sMotionDetectConfig(self, channelNo, *paramList):
         validParam = []
-        goodParam = []
-        availableParam = {
-            "singleLevel": ["Backlight", "DayNightColor", "ExposureMode", "ExposureSpeed", "ExposureValue1",
-                            "ExposureValue2", "ExternalSync", "ExternalSyncPhase" "FlashControl", "Flip", "Gain",
-                            "GainBlue", "GainRed", "GainGreen", "GainAuto", "IrisAuto", "Mirror", "WhiteBalance",
-                            "ReferenceLevel", "Rotate90", "SignalFormat", "AntiFlicker", "GlareInhibition"],
-            "capLevel": ["FlashControl", "NightOptions", "NormalOptions"],
-            "flashControl": ["Pole", "Value", "PreValue", "Mode"],
-            "dayNight": ["BrightnessThreshold", "IrisAuto", "SunriseHour", "SunriseMinute", "SunriseSecond",
-                         "SunsetHour", "SunsetMinute", "SunsetSecond", "SwitchMode", "Profile", "ExposureSpeed",
-                         "ExposureValue1", "ExposureValue2", "Gain", "GainAuto", "GainBlue", "GainGreen", "GainRed",
-                         "WhiteBalance", "ReferenceLevel", "ExternalSyncPhase", "AntiFlicker", "Backlight",
-                         "DayNightColor", "ExposureMode", "GlareInhibition", "Mirror", "Flip", "Rotate90"]}
         for param in paramList:
             if type(param) is tuple:
                 validParam.append(param)
-        for param in validParam:
-            if len(param) == 2:
-                if param[0] in availableParam["singleLevel"]:
-                    goodParam.append(param)
-            if len(param) == 3:
-                if param[0] in availableParam["capLevel"]:
-                    if param[0] == availableParam["capLevel"][0]:
-                        if param[1] in availableParam["flashControl"]:
-                            goodParam.append(param)
-                    elif param[0] == availableParam["capLevel"][1] or param[0] == availableParam["capLevel"][2]:
-                        if param[1] in availableParam["dayNight"]:
-                            goodParam.append(param)
-        if len(goodParam) > 0:
+        if len(validParam) > 0:
             URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig"
-            for i in goodParam:
+            for i in validParam:
                 if len(i) == 2:
-                    URL += "&VideoInOptions[" + str(channelNo) + "]." + i[0] + "=" + i[1]
+                    URL += "&MotionDetect[" + str(channelNo) + "]." + i[0] + "=" + i[1]
                 if len(i) == 3:
-                    URL += "&VideoInOptions[" + str(channelNo) + "]." + i[0] + "." + i[1] + "=" + i[2]
+                    URL += "&MotionDetect[" + str(channelNo) + "]." + i[0] + "." + i[1] + "=" + i[2]
             response = self.session.get(URL)
             if response.status_code == 200:
                 return 0
@@ -409,6 +384,157 @@ class DahuaManager:
         else:
             return response.status_code
 
+    def gMotionDetectConfig(self):
+        response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=MotionDetect")
+        if response.status_code == 200:
+            motionConfig = {}
+            raw = response.text.strip().splitlines()
+            for i in raw:
+                pretty = i[18:]
+                levelAll = pretty[pretty.find("]") + 2:pretty.find("=")]
+                levelCount = levelAll.count(".")
+                val = pretty[pretty.find("=") + 1:]
+                channel = pretty[pretty.find("[") + 1:pretty.find("]")]
+                if pretty.count("[") == 3 and "MotionDetectWindow" in pretty:
+                    regionLevel = pretty[23:]
+                    motionDetectWindowLevel = regionLevel[:regionLevel.find("]")]
+                    regionLevelName = regionLevel[regionLevel.find(".") + 1: regionLevel.find("[")]
+                    regionLevelNameNum = regionLevel[9:]
+                    regionLevelNameNum = regionLevelNameNum[
+                                         regionLevelNameNum.find("[") + 1:regionLevelNameNum.find("]")]
+                    try:
+                        len(motionConfig[channel])
+                    except:
+                        motionConfig[channel] = {}
+                    try:
+                        len(motionConfig[channel]["MotionDetectWindow"])
+                    except:
+                        motionConfig[channel]["MotionDetectWindow"] = {}
+                    try:
+                        len(motionConfig[channel]["MotionDetectWindow"][motionDetectWindowLevel])
+                    except:
+                        motionConfig[channel]["MotionDetectWindow"][motionDetectWindowLevel] = {}
+                    try:
+                        len(motionConfig[channel]["MotionDetectWindow"][motionDetectWindowLevel][regionLevelName])
+                    except:
+                        motionConfig[channel]["MotionDetectWindow"][motionDetectWindowLevel][regionLevelName] = {}
+                    try:
+                        len(motionConfig[channel]["MotionDetectWindow"][motionDetectWindowLevel][regionLevelName][
+                                regionLevelNameNum])
+                    except:
+                        motionConfig[channel]["MotionDetectWindow"][motionDetectWindowLevel][regionLevelName][
+                            regionLevelNameNum] = val
+
+                try:
+                    len(motionConfig[channel])
+                except:
+                    motionConfig[channel] = {}
+                if levelCount == 0:
+                    if "[" not in levelAll:
+                        try:
+                            len(motionConfig[channel][levelAll])
+                        except:
+                            motionConfig[channel][levelAll] = val
+                    elif "[" in levelAll:
+                        level0 = levelAll[:levelAll.find("[")]
+                        level1 = levelAll[levelAll.find("[") + 1:levelAll.find("]")]
+                        try:
+                            len(motionConfig[channel][level0])
+                        except:
+                            motionConfig[channel][level0] = {}
+                        try:
+                            len(motionConfig[channel][level0][level1])
+                        except:
+                            motionConfig[channel][level0][level1] = val
+                elif levelCount == 1:
+                    if levelAll.count("[") == 0:
+                        level0 = levelAll[:levelAll.find(".")]
+                        level1 = levelAll[levelAll.find(".") + 1:]
+                        try:
+                            len(motionConfig[channel][level0])
+                        except:
+                            motionConfig[channel][level0] = {}
+                        try:
+                            len(motionConfig[channel][level0][level1])
+                        except:
+                            motionConfig[channel][level0][level1] = val
+                    if levelAll.count("[") == 1:
+                        level0 = levelAll[:levelAll.find(".")]
+                        level1 = levelAll[levelAll.find(".") + 1:]
+                        if level0.count("[") == 0:
+                            try:
+                                len(motionConfig[channel][level0])
+                            except:
+                                motionConfig[channel][level0] = {}
+                            level1true = level1[:level1.find("[")]
+                            level1sub0 = level1[level1.find("[") + 1:level1.find("]")]
+                            try:
+                                len(motionConfig[channel][level0][level1true])
+                            except:
+                                motionConfig[channel][level0][level1true] = {}
+                            try:
+                                len(motionConfig[channel][level0][level1true][level1sub0])
+                            except:
+                                motionConfig[channel][level0][level1true][level1sub0] = val
+                        elif level0.count("[") == 1:
+                            level0true = level0[:level0.find("[")]
+                            try:
+                                len(motionConfig[channel][level0true])
+                            except:
+                                motionConfig[channel][level0true] = {}
+                            level0sub0 = level0[level0.find("[") + 1:level0.find("]")]
+                            try:
+                                len(motionConfig[channel][level0true][level0sub0])
+                            except:
+                                motionConfig[channel][level0true][level0sub0] = {}
+                            try:
+                                len(motionConfig[channel][level0true][level0sub0][level1])
+                            except:
+                                motionConfig[channel][level0true][level0sub0][level1] = val
+                    elif levelAll.count("[") == 2:
+                        level0 = levelAll[:levelAll.find(".")]
+                        level1 = levelAll[levelAll.find(".") + 1:]
+                        if level0.count("[") == 0:
+                            try:
+                                len(motionConfig[channel][level0])
+                            except:
+                                motionConfig[channel][level0] = {}
+                            level1true = level1[:level1.find("[")]
+                            try:
+                                len(motionConfig[channel][level0][level1true])
+                            except:
+                                motionConfig[channel][level0][level1true] = {}
+                            level1subAll = level1[level1.find("[") + 1:-1]
+                            level1sub0 = level1subAll[:level1subAll.find("]")]
+                            level1sub1 = level1subAll[level1subAll.find("[") + 1:]
+                            try:
+                                len(motionConfig[channel][level0][level1true][level1sub0])
+                            except:
+                                motionConfig[channel][level0][level1true][level1sub0] = {}
+                            try:
+                                len(motionConfig[channel][level0][level1true][level1sub0][level1sub1])
+                            except:
+                                motionConfig[channel][level0][level1true][level1sub0][level1sub1] = val
+                elif levelCount == 2:
+                    try:
+                        len(motionConfig[channel]["EventHandler"])
+                    except:
+                        motionConfig[channel]["EventHandler"] = {}
+                    levelAllPretty = levelAll[13:]
+                    level0 = levelAllPretty[:levelAllPretty.find(".")]
+                    level1 = levelAllPretty[levelAllPretty.find(".") + 1:]
+                    try:
+                        len(motionConfig[channel]["EventHandler"][level0])
+                    except:
+                        motionConfig[channel]["EventHandler"][level0] = {}
+                    try:
+                        len(motionConfig[channel]["EventHandler"][level0][level1])
+                    except:
+                        motionConfig[channel]["EventHandler"][level0][level1] = val
+            print(motionConfig)
+        else:
+            return response.status_code
+
     def gRTSPConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=RTSP")
         if response.status_code == 200:
@@ -463,8 +589,10 @@ mng.gSnapshot(1, "b.png")
 # mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "2"))
 # print(mng.gNTPConfig())
 # print(mng.gRTSPConfig())
-print(mng.gChannelTitleConfig())
-mng.sChannelTitleConfig("0", "Lorem ipsum dolor sit amet")
-print(mng.gChannelTitleConfig())
-mng.gSnapshot(1, "a.png")
+# print(mng.gChannelTitleConfig())
+# mng.sChannelTitleConfig("0", "Lorem ipsum dolor sit amet")
+# print(mng.gChannelTitleConfig())
+# mng.gSnapshot(1, "a.png")
+mng.sMotionDetectConfig("0", ("Enable", "true"), ("PtzManualEnable", "true"))
+mng.gMotionDetectConfig()
 mng.deauth()
