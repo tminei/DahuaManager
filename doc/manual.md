@@ -189,7 +189,7 @@ print(mng.gChannelTitleConfig())
 {'0': 'Lorem ipsum dolor sit amet'}
 ```
 
-**gMotionDetectConfig**()
+**gMotionDetectConfig**() (6.3.2)
 Get current motion detect config:
 
 
