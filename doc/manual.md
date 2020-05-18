@@ -27,24 +27,6 @@ You always need to start working with it and finish with the deauth method.
 
 ### Setting methods
 
-**sCurrentTime**(time)
-%time% is ***array*** of Y M D h m s
-
-**Example:**
-
-```
-mng.sCurrentTime(["2020", "5", "18", "19", "42", "05"])
-```
-
-Possible errors:
-
--> 1 -- array size not equality 6.
-
--> 2 -- year format is not equal to 4 digits.
-
--> 3 -- wrong M D h m s format.
-
-
 **sColor**(param, channel, config, value) (4.2.2 in Dahua manual)
 Method is used to set Brightness, Contrast, Hue, Saturation, TimeSection parametrs. You can use allias b, c, h, s and t.
 
@@ -55,6 +37,24 @@ Example:
 sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"), ("Flip", "false"))
 ```
 In 0 ChannelNo set FlashControl.Mode=1; Mirror=true; NormalOptions.Rotate90=1; Flip=false
+
+**sCurrentTime**(time)
+%time% is ***array*** of Y M D h m s
+
+**Example:**
+
+```
+mng.sCurrentTime(["2020", "5", "18", "19", "42", "05"]) (9.2.2)
+```
+
+Possible errors:
+
+-> 1 -- array size not equality 6.
+
+-> 2 -- year format is not equal to 4 digits.
+
+-> 3 -- wrong M D h m s format.
+
 
 **sBasicConfig**(paramList) (5.2.2)
 A method that allows you to change the default network settings.
@@ -153,6 +153,16 @@ q = {'0': {'AlarmDayNightColorMode': '0', 'AntiFlicker': '0', 'AutoSyncPhase': '
 ```
 
 **gMaxExtraStreamCounts**() (4.1.2) Does exactly what the title says.
+
+**gCurrentTime**() (9.2.1)
+
+Get current time.
+
+The output would be about this:
+```
+{'full': '2020-05-18 19:42:46', 'Y': '2020', 'M': '05', 'D': '18', 'h': '19', 'm': '42', 's': '46'}
+```
+Where %full% - full time in YMDhms format, %Y% - year, %M% - month, %D% - day, "h" - hour, "m" - minute, "s" - seconds 
 
 **gColor**() (4.2.1) return dict of **channelNo** dicts of **configNo** dicts of Brightness, Contrast, Hue, Saturation, TimeSection parametrs.
 
