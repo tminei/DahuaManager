@@ -191,6 +191,8 @@ print(mng.gChannelTitleConfig())
 
 **gMotionDetectConfig**()
 Get current motion detect config:
+
+
 [Example output](https://pastebin.com/GVhNJ0vd) (Huge!)
 
 
