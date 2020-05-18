@@ -37,9 +37,13 @@ mng.sCurrentTime(["2020", "5", "18", "19", "42", "05"])
 ```
 
 Possible errors:
+
 -> 1 -- array size not equality 6.
+
 -> 2 -- year format is not equal to 4 digits.
+
 -> 3 -- wrong M D h m s format.
+
 
 **sColor**(param, channel, config, value) (4.2.2 in Dahua manual)
 Method is used to set Brightness, Contrast, Hue, Saturation, TimeSection parametrs. You can use allias b, c, h, s and t.
