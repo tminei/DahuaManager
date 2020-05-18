@@ -95,6 +95,13 @@ mng.sRTSPConfig(("Enable", "true"))
 ```
 **If the server is started, the parameters will not be changed.**
 
+**sChannelTitleConfig**(channel, name) (4.7.2)
+Change %channel% title to %name%.
+
+**Example:**
+
+mng.sChannelTitleConfig("0", "Lorem ipsum dolor sit amet")
+
 ### Receiving methods
 
 **gVideoInputCaps**(channel) (4.3.1 in Dahua manual)
@@ -153,6 +160,24 @@ table.RTSP.Enable=false
 table.RTSP.Port=554
 table.RTSP.RTP.EndPort=40000
 table.RTSP.RTP.StartPort=20000
+```
+
+**gChannelTitleConfig**() (4.7.1)
+Gets the titles of all channels.
+
+**Example:**
+
+```
+print(mng.gChannelTitleConfig())
+mng.sChannelTitleConfig("0", "Lorem ipsum dolor sit amet")
+print(mng.gChannelTitleConfig())
+```
+
+**Output:**
+
+```
+{'0': 'Test'}
+{'0': 'Lorem ipsum dolor sit amet'}
 ```
 
 ### Hint
