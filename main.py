@@ -28,6 +28,35 @@ class DahuaManager:
             file.write(jsonconfig)
         return 0
 
+    def sCurrentTime(self, time):
+        # time must be array of Y M D h m s
+        # Ex: sCurrentTime(["2020","5","18","19","20","5"])
+        if len(time) == 6:
+            if len(time[0]) == 4:
+                if len(time[1]) == 2 or len(time[1]) == 1 and len(time[2]) == 2 or len(time[1]) == 2 and len(
+                        time[3]) == 2 or len(time[3]) == 1 and len(time[4]) == 2 or len(time[4]) == 1 and len(
+                    time[5]) == 2 or len(time[5]) == 1:
+                    if len(time[3]) == 1:
+                        time[3] = "0" + str(time[3])
+                    if len(time[4]) == 1:
+                        time[4] = "0" + str(time[4])
+                    if len(time[5]) == 1:
+                        time[5] = "0" + str(time[5])
+                    URL = self.url + "/cgi-bin/global.cgi?action=setCurrentTime&time=" + time[0] + "-" + time[1] + "-" + \
+                          time[2] + "%20" + time[3] + ":" + time[4] + ":" + time[5]
+                    response = self.session.get(URL)
+                    if response.status_code == 200:
+                        return 0
+                    else:
+                        return response.status_code
+
+                else:
+                    return 3
+            else:
+                return 2
+        else:
+            return 1
+
     def sRTSPConfig(self, *paramList):
         # if RTP level first param is RTP
         validParam = []
@@ -60,11 +89,11 @@ class DahuaManager:
                     URL += "&RTSP." + i[0] + "=" + i[1]
                 if len(i) == 3:
                     URL += "&RTSP." + i[0] + "." + i[1] + "=" + i[2]
-            # response = self.session.get(URL)
-            # if response.status_code == 200:
-            #     return 0
-            # else:
-            #     return response.status_code
+            response = self.session.get(URL)
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
             print(URL)
         else:
             return 1
@@ -329,6 +358,7 @@ class DahuaManager:
         else:
             return response.status_code
 
+
     def gNTPConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=NTP")
         if response.status_code == 200:
@@ -344,6 +374,7 @@ class DahuaManager:
             return NTP
         else:
             return response.status_code
+
 
     def gBasicConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=Network")
@@ -383,6 +414,7 @@ class DahuaManager:
             return basicConfig
         else:
             return response.status_code
+
 
     def gMotionDetectConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=MotionDetect")
@@ -535,6 +567,31 @@ class DahuaManager:
         else:
             return response.status_code
 
+    def gCurrentTime(self):
+        response = self.session.get(self.url + "/cgi-bin/global.cgi?action=getCurrentTime")
+        timeArr = {}
+        if response.status_code == 200:
+            raw = response.text.strip().splitlines()
+            timeFull = raw[0]
+            timeFull = timeFull[timeFull.find("=") + 1:]
+            Y = timeFull[0:4]
+            M = timeFull[5:7]
+            D = timeFull[8:10]
+            h = timeFull[11:13]
+            m = timeFull[14:16]
+            s = timeFull[17:19]
+            timeArr["full"] = timeFull
+            timeArr["Y"] = Y
+            timeArr["M"] = M
+            timeArr["D"] = D
+            timeArr["h"] = h
+            timeArr["m"] = m
+            timeArr["s"] = s
+            return timeArr
+        else:
+            return response.status_code
+
+
     def gRTSPConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=RTSP")
         if response.status_code == 200:
@@ -592,7 +649,10 @@ mng.gSnapshot(1, "b.png")
 # print(mng.gChannelTitleConfig())
 # mng.sChannelTitleConfig("0", "Lorem ipsum dolor sit amet")
 # print(mng.gChannelTitleConfig())
-# mng.gSnapshot(1, "a.png")
-mng.sMotionDetectConfig("0", ("Enable", "true"), ("PtzManualEnable", "true"))
-mng.gMotionDetectConfig()
+# mng.gMotionDetectConfig()
+# mng.sMotionDetectConfig("0", ("Enable", "true"), ("PtzManualEnable", "true"))
+# mng.gMotionDetectConfig()
+print(mng.gCurrentTime())
+print(mng.sCurrentTime(["2020", "5", "18", "19", "42", "05"]))
+#mng.gSnapshot(1, "a.png")
 mng.deauth()
