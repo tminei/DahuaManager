@@ -3,6 +3,7 @@ import json  # for backup/restore
 import requests
 from requests.auth import HTTPDigestAuth
 
+
 # s is set
 # g is get
 # b is backup
@@ -196,6 +197,34 @@ class DahuaManager:
                 return response.status_code
         else:
             return 1
+
+    def sChannelTitleConfig(self, channel, name):
+        if int(channel) < 0:
+            channel = 0
+        URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig&ChannelTitle[" + str(channel) + "].Name=" + str(
+            name)
+        response = self.session.get(URL)
+        if response.status_code == 200:
+            return 0
+        else:
+            return response.status_code
+
+    def gChannelTitleConfig(self):
+        response = self.session.get(
+            self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=ChannelTitle")
+        if response.status_code == 200:
+            title = {}
+            raw = response.text.strip().splitlines()
+            for i in raw:
+                num = i[i.find("[") + 1:i.find("]")]
+                val = i[i.find("=") + 1:]
+                try:
+                    len(title[num])
+                except:
+                    title[num] = val
+            return title
+        else:
+            return response.status_code
 
     def gVideoInputCaps(self, channel):
         response = self.session.get(
@@ -418,10 +447,9 @@ mng.auth()
 # mng.sColor("b", 0, 0, 100)
 # clr = mng.gColor()
 # print(clr)
-# mng.gSnapshot(1, "b.png")
+mng.gSnapshot(1, "b.png")
 # mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
 #                           ("Flip", "true"))
-# mng.gSnapshot(1, "a.png")
 # mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
 #                           ("Flip", "false"))
 # mng.gSnapshot(1, "a2.png")
@@ -435,6 +463,8 @@ mng.auth()
 # mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "2"))
 # print(mng.gNTPConfig())
 # print(mng.gRTSPConfig())
-
-
+print(mng.gChannelTitleConfig())
+mng.sChannelTitleConfig("0", "Lorem ipsum dolor sit amet")
+print(mng.gChannelTitleConfig())
+mng.gSnapshot(1, "a.png")
 mng.deauth()
