@@ -26,14 +26,22 @@ Accepts *reboot* and *shutdown* values. Reboot or shutdown the camera, depending
 Get system info.
 
 %operation% can be:
+
 GetDeviceType (shortcut: 0)
+
 GetHardwareVersion (1)
+
 GetSerialNo (2)
+
 GetMachineName (3)
+
 GetSystemInfo (4)
+
 GetVendor (5)
+
 GetSoftwareVersion(6)
-GetOnvifVersion (7) **Warning** return 400 if no Onvif is.
+
+GetOnvifVersion (7) **Warning** return 400 if no Onvif version.
 
 ### Management methods
 
