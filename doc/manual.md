@@ -128,11 +128,32 @@ Set motion detect config.
 
 mng.sMotionDetectConfig("0", ("Enable", "true"), ("PtzManualEnable", "true"))
 
+**sLocalesConfig**(paramList) (9.3.2)
+Set locales config.
+
+**Example:**
+
+mng.sLocalesConfig(("DSTEnable", "true"))
+
+
 
 ### Receiving methods
 
 **gVideoInputCaps**(channel) (4.3.1 in Dahua manual)
 Get video input capabilities, *channelNo* is video in channel index.
+
+**gLocalesConfig**() (9.3.1)
+
+**Example:**
+
+print(mng.gLocalesConfig())
+
+**Output:** 
+
+```
+{'DSTEnable': 'false', 'DSTEnd': {'Day': '0', 'Hour': '0', 'Minute': '0', 'Month': '10', 'Week': '-1', 'Year': '2020'}, 'DSTStart': {'Day': '0', 'Hour': '0', 'Minute': '0', 'Month': '3', 'Week': '-1', 'Year': '2020'}, 'TimeFormat': 'yyyy-MM-dd HH:mm:ss'}
+
+```
 
 **gVideoInOptionsConfig**() (4.3.2)
 Video in options contain Backlight, ExposureSpeed, DayNightColor. DayOptions, NightOptions, NormalOptions and so on
