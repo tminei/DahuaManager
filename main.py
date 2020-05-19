@@ -83,7 +83,6 @@ class DahuaManager:
                     goodParam.append(param)
         if len(goodParam) > 0:
             URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig"
-
             for i in goodParam:
                 if len(i) == 2:
                     URL += "&RTSP." + i[0] + "=" + i[1]
@@ -94,7 +93,6 @@ class DahuaManager:
                 return 0
             else:
                 return response.status_code
-            print(URL)
         else:
             return 1
 
@@ -213,6 +211,28 @@ class DahuaManager:
         else:
             return response.status_code
 
+    def sLocalesConfig(self, *paramList):
+        validParam = []
+        for param in paramList:
+            if type(param) is tuple:
+                validParam.append(param)
+        if len(validParam) > 0:
+            URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig"
+            for i in validParam:
+                if len(i) == 2:
+                    URL += "&Locales." + i[0] + "=" + i[1]
+                if len(i) == 3:
+                    URL += "&Locales." + i[0] + "." + i[1] + "=" + i[2]
+            response = self.session.get(URL)
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
+        else:
+            return 1
+
+        pass
+
     def gChannelTitleConfig(self):
         response = self.session.get(
             self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=ChannelTitle")
@@ -227,6 +247,36 @@ class DahuaManager:
                 except:
                     title[num] = val
             return title
+        else:
+            return response.status_code
+
+    def gLocalesConfig(self):
+        response = self.session.get(
+            self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=Locales")
+        if response.status_code == 200:
+            localesConfig = {}
+            raw = response.text.strip().splitlines()
+            for i in raw:
+                pretty = i[14:]
+                name = pretty[:pretty.find("=")]
+                val = pretty[pretty.find("=") + 1:]
+                if name.count(".") == 0:
+                    try:
+                        len(localesConfig[name])
+                    except:
+                        localesConfig[name] = val
+                elif name.count(".") > 0:
+                    level0 = name[:name.find(".")]
+                    level1 = name[name.find(".") + 1:]
+                    try:
+                        len(localesConfig[level0])
+                    except:
+                        localesConfig[level0] = {}
+                    try:
+                        len(localesConfig[level0][level1])
+                    except:
+                        localesConfig[level0][level1] = val
+            return localesConfig
         else:
             return response.status_code
 
@@ -358,7 +408,6 @@ class DahuaManager:
         else:
             return response.status_code
 
-
     def gNTPConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=NTP")
         if response.status_code == 200:
@@ -374,7 +423,6 @@ class DahuaManager:
             return NTP
         else:
             return response.status_code
-
 
     def gBasicConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=Network")
@@ -414,7 +462,6 @@ class DahuaManager:
             return basicConfig
         else:
             return response.status_code
-
 
     def gMotionDetectConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=MotionDetect")
@@ -591,7 +638,6 @@ class DahuaManager:
         else:
             return response.status_code
 
-
     def gRTSPConfig(self):
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=RTSP")
         if response.status_code == 200:
@@ -652,7 +698,9 @@ mng.gSnapshot(1, "b.png")
 # mng.gMotionDetectConfig()
 # mng.sMotionDetectConfig("0", ("Enable", "true"), ("PtzManualEnable", "true"))
 # mng.gMotionDetectConfig()
-print(mng.gCurrentTime())
-print(mng.sCurrentTime(["2020", "5", "18", "19", "42", "05"]))
-#mng.gSnapshot(1, "a.png")
+# print(mng.gCurrentTime())
+# print(mng.sCurrentTime(["2020", "5", "18", "19", "42", "05"]))
+# mng.gSnapshot(1, "a.png")
+print(mng.gLocalesConfig())
+# mng.sLocalesConfig(("DSTEnable", "true"))
 mng.deauth()
