@@ -667,6 +667,63 @@ class DahuaManager:
         else:
             return response.status_code
 
+    def sysInit(self, operation):
+        if operation == "reboot":
+            response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=reboot")
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
+        elif operation == "shutdown":
+            response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=shutdown")
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
+        else:
+            return 1
+
+    def sysInfo(self, operation):
+        if operation == "GetDeviceType" or operation == "DeviceType" or operation == "DevType" or operation == "GetDevType" or str(
+                operation) == "0":
+            action = "getDeviceType"
+        elif operation == "GetHardwareVersion" or operation == "HardwareVersion" or operation == "HardVer" or str(
+                operation) == "1":
+            action = "getHardwareVersion"
+        elif operation == "GetSerialNo" or operation == "SerialNo" or str(operation) == "2":
+            action = "getSerialNo"
+        elif operation == "GetMachineName" or operation == "GetName" or str(operation) == "3":
+            action = "getMachineName"
+        elif operation == "GetSystemInfo" or operation == "SysInfo" or operation == "GetInfo" or operation == "Info" or str(
+                operation) == "4":
+            action = "getSystemInfo"
+        elif operation == "GetVendor" or operation == "Vendor" or str(operation) == "5":
+            action = "getVendor"
+        elif operation == "GetSoftwareVersion" or operation == "SoftVer" or str(operation) == "6":
+            action = "getSoftwareVersion"
+        elif operation == "GetOnvifVersion" or operation == "Onvif" or operation == "OnvifVer" or str(operation) == "7":
+            action = "getOnvifVersion"
+        else:
+            return 1
+        response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=" + action)
+
+        if response.status_code == 200:
+            data = {}
+            raw = response.text.strip().splitlines()
+            for i in raw:
+                if len(i) > 1:
+                    name = i[:i.find("=")]
+                    val = i[i.find("=")+1:]
+                    try:
+                        len(data[name])
+                    except:
+                        data[name] = val
+                else:
+                    data["NaN"] = "NaN"
+            return data
+        else:
+            return response.status_code
+
 
 mng = DahuaManager()
 
@@ -676,7 +733,7 @@ mng.auth()
 # mng.sColor("b", 0, 0, 100)
 # clr = mng.gColor()
 # print(clr)
-mng.gSnapshot(1, "b.png")
+# mng.gSnapshot(1, "b.png")
 # mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
 #                           ("Flip", "true"))
 # mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
@@ -701,6 +758,7 @@ mng.gSnapshot(1, "b.png")
 # print(mng.gCurrentTime())
 # print(mng.sCurrentTime(["2020", "5", "18", "19", "42", "05"]))
 # mng.gSnapshot(1, "a.png")
-print(mng.gLocalesConfig())
+# print(mng.gLocalesConfig())
 # mng.sLocalesConfig(("DSTEnable", "true"))
+# print(mng.sysInit("shutdown"))
 mng.deauth()
