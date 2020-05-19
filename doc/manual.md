@@ -16,6 +16,25 @@
 
 ### Description of methods
 
+### System methods
+
+**sysInit**(operation) (9.8.{1-2})
+
+Accepts *reboot* and *shutdown* values. Reboot or shutdown the camera, depending on the value.
+
+**sysInfo** (operation) (9.8.{3-10})
+Get system info.
+
+%operation% can be:
+GetDeviceType (shortcut: 0)
+GetHardwareVersion (1)
+GetSerialNo (2)
+GetMachineName (3)
+GetSystemInfo (4)
+GetVendor (5)
+GetSoftwareVersion(6)
+GetOnvifVersion (7) **Warning** return 400 if no Onvif is.
+
 ### Management methods
 
 **auth**() method is needed for the authentication. 
