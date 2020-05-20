@@ -176,6 +176,26 @@ class DahuaManager:
         else:
             return 1
 
+    def sBlindDetectConfig(self, channelNo, *paramList):
+        validParam = []
+        for param in paramList:
+            if type(param) is tuple:
+                validParam.append(param)
+        if len(validParam) > 0:
+            URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig"
+            for i in validParam:
+                if len(i) == 2:
+                    URL += "&BlindDetect[" + str(channelNo) + "]." + i[0] + "=" + i[1]
+                if len(i) == 3:
+                    URL += "&BlindDetect[" + str(channelNo) + "]." + i[0] + "." + i[1] + "=" + i[2]
+            response = self.session.get(URL)
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
+        else:
+            return 1
+
     def sNTPConfig(self, *paramList):
         validParam = []
         goodParam = []
@@ -610,7 +630,7 @@ class DahuaManager:
                         len(motionConfig[channel]["EventHandler"][level0][level1])
                     except:
                         motionConfig[channel]["EventHandler"][level0][level1] = val
-            print(motionConfig)
+            return motionConfig
         else:
             return response.status_code
 
@@ -667,6 +687,158 @@ class DahuaManager:
         else:
             return response.status_code
 
+    def gBlindDetectConfig(self):
+        blindConfig = {}
+        response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=BlindDetect")
+        if response.status_code == 200:
+            raw = response.text.strip().splitlines()
+            print(raw)
+            for i in raw:
+                pretty = i[18:]
+                levelAll = pretty[pretty.find("]") + 2:pretty.find("=")]
+                levelCount = levelAll.count(".")
+                val = pretty[pretty.find("=") + 1:]
+                channel = pretty[pretty.find("[") + 1:pretty.find("]")]
+                if pretty.count("[") == 3 and "BlindDetectWindow" in pretty:
+                    regionLevel = pretty[23:]
+                    blindDetectWindowLevel = regionLevel[:regionLevel.find("]")]
+                    regionLevelName = regionLevel[regionLevel.find(".") + 1: regionLevel.find("[")]
+                    regionLevelNameNum = regionLevel[9:]
+                    regionLevelNameNum = regionLevelNameNum[
+                                         regionLevelNameNum.find("[") + 1:regionLevelNameNum.find("]")]
+                    try:
+                        len(blindConfig[channel])
+                    except:
+                        blindConfig[channel] = {}
+                    try:
+                        len(blindConfig[channel]["BlindDetectWindow"])
+                    except:
+                        blindConfig[channel]["BlindDetectWindow"] = {}
+                    try:
+                        len(blindConfig[channel]["BlindDetectWindow"][blindDetectWindowLevel])
+                    except:
+                        blindConfig[channel]["BlindDetectWindow"][blindDetectWindowLevel] = {}
+                    try:
+                        len(blindConfig[channel]["BlindDetectWindow"][blindDetectWindowLevel][regionLevelName])
+                    except:
+                        blindConfig[channel]["BlindDetectWindow"][blindDetectWindowLevel][regionLevelName] = {}
+                    try:
+                        len(blindConfig[channel]["BlindDetectWindow"][blindDetectWindowLevel][regionLevelName][
+                                regionLevelNameNum])
+                    except:
+                        blindConfig[channel]["BlindDetectWindow"][blindDetectWindowLevel][regionLevelName][
+                            regionLevelNameNum] = val
+
+                try:
+                    len(blindConfig[channel])
+                except:
+                    blindConfig[channel] = {}
+                if levelCount == 0:
+                    if "[" not in levelAll:
+                        try:
+                            len(blindConfig[channel][levelAll])
+                        except:
+                            blindConfig[channel][levelAll] = val
+                    elif "[" in levelAll:
+                        level0 = levelAll[:levelAll.find("[")]
+                        level1 = levelAll[levelAll.find("[") + 1:levelAll.find("]")]
+                        try:
+                            len(blindConfig[channel][level0])
+                        except:
+                            blindConfig[channel][level0] = {}
+                        try:
+                            len(blindConfig[channel][level0][level1])
+                        except:
+                            blindConfig[channel][level0][level1] = val
+                elif levelCount == 1:
+                    if levelAll.count("[") == 0:
+                        level0 = levelAll[:levelAll.find(".")]
+                        level1 = levelAll[levelAll.find(".") + 1:]
+                        try:
+                            len(blindConfig[channel][level0])
+                        except:
+                            blindConfig[channel][level0] = {}
+                        try:
+                            len(blindConfig[channel][level0][level1])
+                        except:
+                            blindConfig[channel][level0][level1] = val
+                    if levelAll.count("[") == 1:
+                        level0 = levelAll[:levelAll.find(".")]
+                        level1 = levelAll[levelAll.find(".") + 1:]
+                        if level0.count("[") == 0:
+                            try:
+                                len(blindConfig[channel][level0])
+                            except:
+                                blindConfig[channel][level0] = {}
+                            level1true = level1[:level1.find("[")]
+                            level1sub0 = level1[level1.find("[") + 1:level1.find("]")]
+                            try:
+                                len(blindConfig[channel][level0][level1true])
+                            except:
+                                blindConfig[channel][level0][level1true] = {}
+                            try:
+                                len(blindConfig[channel][level0][level1true][level1sub0])
+                            except:
+                                blindConfig[channel][level0][level1true][level1sub0] = val
+                        elif level0.count("[") == 1:
+                            level0true = level0[:level0.find("[")]
+                            try:
+                                len(blindConfig[channel][level0true])
+                            except:
+                                blindConfig[channel][level0true] = {}
+                            level0sub0 = level0[level0.find("[") + 1:level0.find("]")]
+                            try:
+                                len(blindConfig[channel][level0true][level0sub0])
+                            except:
+                                blindConfig[channel][level0true][level0sub0] = {}
+                            try:
+                                len(blindConfig[channel][level0true][level0sub0][level1])
+                            except:
+                                blindConfig[channel][level0true][level0sub0][level1] = val
+                    elif levelAll.count("[") == 2:
+                        level0 = levelAll[:levelAll.find(".")]
+                        level1 = levelAll[levelAll.find(".") + 1:]
+                        if level0.count("[") == 0:
+                            try:
+                                len(blindConfig[channel][level0])
+                            except:
+                                blindConfig[channel][level0] = {}
+                            level1true = level1[:level1.find("[")]
+                            try:
+                                len(blindConfig[channel][level0][level1true])
+                            except:
+                                blindConfig[channel][level0][level1true] = {}
+                            level1subAll = level1[level1.find("[") + 1:-1]
+                            level1sub0 = level1subAll[:level1subAll.find("]")]
+                            level1sub1 = level1subAll[level1subAll.find("[") + 1:]
+                            try:
+                                len(blindConfig[channel][level0][level1true][level1sub0])
+                            except:
+                                blindConfig[channel][level0][level1true][level1sub0] = {}
+                            try:
+                                len(blindConfig[channel][level0][level1true][level1sub0][level1sub1])
+                            except:
+                                blindConfig[channel][level0][level1true][level1sub0][level1sub1] = val
+                elif levelCount == 2:
+                    try:
+                        len(blindConfig[channel]["EventHandler"])
+                    except:
+                        blindConfig[channel]["EventHandler"] = {}
+                    levelAllPretty = levelAll[13:]
+                    level0 = levelAllPretty[:levelAllPretty.find(".")]
+                    level1 = levelAllPretty[levelAllPretty.find(".") + 1:]
+                    try:
+                        len(blindConfig[channel]["EventHandler"][level0])
+                    except:
+                        blindConfig[channel]["EventHandler"][level0] = {}
+                    try:
+                        len(blindConfig[channel]["EventHandler"][level0][level1])
+                    except:
+                        blindConfig[channel]["EventHandler"][level0][level1] = val
+            return blindConfig
+        else:
+            return response.status_code
+
     def sysInit(self, operation):
         if operation == "reboot":
             response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=reboot")
@@ -713,7 +885,7 @@ class DahuaManager:
             for i in raw:
                 if len(i) > 1:
                     name = i[:i.find("=")]
-                    val = i[i.find("=")+1:]
+                    val = i[i.find("=") + 1:]
                     try:
                         len(data[name])
                     except:
@@ -761,4 +933,7 @@ mng.auth()
 # print(mng.gLocalesConfig())
 # mng.sLocalesConfig(("DSTEnable", "true"))
 # print(mng.sysInit("shutdown"))
+# print(mng.gBlindDetectConfig())
+# print(mng.sBlindDetectConfig("0", ("Enable", "falce")))
+# print(mng.gBlindDetectConfig())
 mng.deauth()
