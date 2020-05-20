@@ -155,6 +155,14 @@ Set motion detect config.
 
 mng.sMotionDetectConfig("0", ("Enable", "true"), ("PtzManualEnable", "true"))
 
+**sBlindDetectConfig**(channelNo, paramList) (6.4.1)
+Set blind detect config.
+
+**Example:**
+
+mng.sBlindDetectConfig("0", ("Enable", "true"))
+
+
 **sLocalesConfig**(paramList) (9.3.2)
 Set locales config.
 
@@ -270,6 +278,15 @@ Get current motion detect config:
 
 
 [Example output](https://pastebin.com/GVhNJ0vd) (Huge!)
+
+
+**gMotionDetectConfig**() (6.3.2)
+Get current motion detect config:
+
+**gBlindnDetectConfig**() (6.4.2)
+
+Output same type as motion detect config
+
 
 
 ### Hint
