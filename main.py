@@ -3,6 +3,10 @@ import json  # for backup/restore
 import requests
 from requests.auth import HTTPDigestAuth
 
+login = ""
+password = ""
+url = ""
+
 
 # s is set
 # g is get
@@ -10,9 +14,9 @@ from requests.auth import HTTPDigestAuth
 # r is restore
 
 class DahuaManager:
-    login = 'admin'
-    password = 'admin'
-    url = "http"
+    login = login
+    password = password
+    url = url
     session = requests.session()
 
     def auth(self):
@@ -20,6 +24,63 @@ class DahuaManager:
 
     def deauth(self):
         self.session.close()
+
+    def sysInit(self, operation):
+        if operation == "reboot":
+            response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=reboot")
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
+        elif operation == "shutdown":
+            response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=shutdown")
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
+        else:
+            return 1
+
+    def sysInfo(self, operation):
+        if operation == "GetDeviceType" or operation == "DeviceType" or operation == "DevType" or operation == "GetDevType" or str(
+                operation) == "0":
+            action = "getDeviceType"
+        elif operation == "GetHardwareVersion" or operation == "HardwareVersion" or operation == "HardVer" or str(
+                operation) == "1":
+            action = "getHardwareVersion"
+        elif operation == "GetSerialNo" or operation == "SerialNo" or str(operation) == "2":
+            action = "getSerialNo"
+        elif operation == "GetMachineName" or operation == "GetName" or str(operation) == "3":
+            action = "getMachineName"
+        elif operation == "GetSystemInfo" or operation == "SysInfo" or operation == "GetInfo" or operation == "Info" or str(
+                operation) == "4":
+            action = "getSystemInfo"
+        elif operation == "GetVendor" or operation == "Vendor" or str(operation) == "5":
+            action = "getVendor"
+        elif operation == "GetSoftwareVersion" or operation == "SoftVer" or str(operation) == "6":
+            action = "getSoftwareVersion"
+        elif operation == "GetOnvifVersion" or operation == "Onvif" or operation == "OnvifVer" or str(operation) == "7":
+            action = "getOnvifVersion"
+        else:
+            return 1
+        response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=" + action)
+
+        if response.status_code == 200:
+            data = {}
+            raw = response.text.strip().splitlines()
+            for i in raw:
+                if len(i) > 1:
+                    name = i[:i.find("=")]
+                    val = i[i.find("=") + 1:]
+                    try:
+                        len(data[name])
+                    except:
+                        data[name] = val
+                else:
+                    data["NaN"] = "NaN"
+            return data
+        else:
+            return response.status_code
 
     def bVideoInOptionsConfig(self, filename):
         config = self.gVideoInOptionsConfig()
@@ -57,7 +118,7 @@ class DahuaManager:
         else:
             return 1
 
-    def sRTSPConfig(self, *paramList):
+    def sRTSPConfig(self, *params):
         # if RTP level first param is RTP
         validParam = []
         goodParam = []
@@ -69,7 +130,7 @@ class DahuaManager:
                 "StartPort", "EndPort"
             ]
         }
-        for param in paramList:
+        for param in params:
             if type(param) is tuple:
                 validParam.append(param)
         for param in validParam:
@@ -96,8 +157,8 @@ class DahuaManager:
         else:
             return 1
 
-    def sBasicConfig(self, *paramList):
-        # inteface is first item in *paramList tuple; ex:(eth0, DefaultGateway, 192.168.1.1)
+    def sBasicConfig(self, *params):
+        # interface is first item in *params tuple; ex:(eth0, DefaultGateway, 192.168.1.1)
         validParam = []
         goodParam = []
         availableParam = {
@@ -108,7 +169,7 @@ class DahuaManager:
                 "DefaultGateway", "DhcpEnable", "DnsServers[0]", "DnsServers[1]", "IPAddress", "MTU", "PhysicalAddress"
             ]
         }
-        for param in paramList:
+        for param in params:
             if type(param) is tuple:
                 validParam.append(param)
         for param in validParam:
@@ -156,9 +217,9 @@ class DahuaManager:
         else:
             return 1
 
-    def sMotionDetectConfig(self, channelNo, *paramList):
+    def sMotionDetectConfig(self, channelNo, *params):
         validParam = []
-        for param in paramList:
+        for param in params:
             if type(param) is tuple:
                 validParam.append(param)
         if len(validParam) > 0:
@@ -176,9 +237,9 @@ class DahuaManager:
         else:
             return 1
 
-    def sBlindDetectConfig(self, channelNo, *paramList):
+    def sBlindDetectConfig(self, channelNo, *params):
         validParam = []
-        for param in paramList:
+        for param in params:
             if type(param) is tuple:
                 validParam.append(param)
         if len(validParam) > 0:
@@ -196,11 +257,11 @@ class DahuaManager:
         else:
             return 1
 
-    def sNTPConfig(self, *paramList):
+    def sNTPConfig(self, *params):
         validParam = []
         goodParam = []
         availableParam = ["Address", "Enable", "Port", "TimeZone"]
-        for param in paramList:
+        for param in params:
             if type(param) is tuple:
                 validParam.append(param)
         for param in validParam:
@@ -231,9 +292,9 @@ class DahuaManager:
         else:
             return response.status_code
 
-    def sLocalesConfig(self, *paramList):
+    def sLocalesConfig(self, *params):
         validParam = []
-        for param in paramList:
+        for param in params:
             if type(param) is tuple:
                 validParam.append(param)
         if len(validParam) > 0:
@@ -692,7 +753,6 @@ class DahuaManager:
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=BlindDetect")
         if response.status_code == 200:
             raw = response.text.strip().splitlines()
-            print(raw)
             for i in raw:
                 pretty = i[18:]
                 levelAll = pretty[pretty.find("]") + 2:pretty.find("=")]
@@ -838,102 +898,3 @@ class DahuaManager:
             return blindConfig
         else:
             return response.status_code
-
-    def sysInit(self, operation):
-        if operation == "reboot":
-            response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=reboot")
-            if response.status_code == 200:
-                return 0
-            else:
-                return response.status_code
-        elif operation == "shutdown":
-            response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=shutdown")
-            if response.status_code == 200:
-                return 0
-            else:
-                return response.status_code
-        else:
-            return 1
-
-    def sysInfo(self, operation):
-        if operation == "GetDeviceType" or operation == "DeviceType" or operation == "DevType" or operation == "GetDevType" or str(
-                operation) == "0":
-            action = "getDeviceType"
-        elif operation == "GetHardwareVersion" or operation == "HardwareVersion" or operation == "HardVer" or str(
-                operation) == "1":
-            action = "getHardwareVersion"
-        elif operation == "GetSerialNo" or operation == "SerialNo" or str(operation) == "2":
-            action = "getSerialNo"
-        elif operation == "GetMachineName" or operation == "GetName" or str(operation) == "3":
-            action = "getMachineName"
-        elif operation == "GetSystemInfo" or operation == "SysInfo" or operation == "GetInfo" or operation == "Info" or str(
-                operation) == "4":
-            action = "getSystemInfo"
-        elif operation == "GetVendor" or operation == "Vendor" or str(operation) == "5":
-            action = "getVendor"
-        elif operation == "GetSoftwareVersion" or operation == "SoftVer" or str(operation) == "6":
-            action = "getSoftwareVersion"
-        elif operation == "GetOnvifVersion" or operation == "Onvif" or operation == "OnvifVer" or str(operation) == "7":
-            action = "getOnvifVersion"
-        else:
-            return 1
-        response = self.session.get(self.url + "/cgi-bin/magicBox.cgi?action=" + action)
-
-        if response.status_code == 200:
-            data = {}
-            raw = response.text.strip().splitlines()
-            for i in raw:
-                if len(i) > 1:
-                    name = i[:i.find("=")]
-                    val = i[i.find("=") + 1:]
-                    try:
-                        len(data[name])
-                    except:
-                        data[name] = val
-                else:
-                    data["NaN"] = "NaN"
-            return data
-        else:
-            return response.status_code
-
-
-mng = DahuaManager()
-
-mng.auth()
-
-# mng.gSnapshot(1, "test.png")
-# mng.sColor("b", 0, 0, 100)
-# clr = mng.gColor()
-# print(clr)
-# mng.gSnapshot(1, "b.png")
-# mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
-#                           ("Flip", "true"))
-# mng.sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"),
-#                           ("Flip", "false"))
-# mng.gSnapshot(1, "a2.png")
-# print(mng.gVideoInputCaps(channel=1))
-# mng.bVideoInOptionsConfig("test.json")
-# mng.sBasicConfig(("Domain", "dahua"), ("eth0", "DnsServers[1]", "8.8.4.4"))
-# print(mng.gBasicConfig())
-# print(mng.gNTPConfig())
-# mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "3"))
-# print(mng.gNTPConfig())
-# mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "2"))
-# print(mng.gNTPConfig())
-# print(mng.gRTSPConfig())
-# print(mng.gChannelTitleConfig())
-# mng.sChannelTitleConfig("0", "Lorem ipsum dolor sit amet")
-# print(mng.gChannelTitleConfig())
-# mng.gMotionDetectConfig()
-# mng.sMotionDetectConfig("0", ("Enable", "true"), ("PtzManualEnable", "true"))
-# mng.gMotionDetectConfig()
-# print(mng.gCurrentTime())
-# print(mng.sCurrentTime(["2020", "5", "18", "19", "42", "05"]))
-# mng.gSnapshot(1, "a.png")
-# print(mng.gLocalesConfig())
-# mng.sLocalesConfig(("DSTEnable", "true"))
-# print(mng.sysInit("shutdown"))
-# print(mng.gBlindDetectConfig())
-# print(mng.sBlindDetectConfig("0", ("Enable", "falce")))
-# print(mng.gBlindDetectConfig())
-mng.deauth()
