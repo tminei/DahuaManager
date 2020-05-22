@@ -1,26 +1,26 @@
 # PYTHON DAHUA MANAGER MANUAL
-## Preparation
-### Links
+# Preparation
+## Links
 [DAHUA API](https://dipp.dahuasecurity.com/integrationProtocols/112)
 
-### Dependencies
+## Dependencies
     pip3 install shutil
     pip3 install requests
 
-## API documentation
-### Shortening method names
+# API documentation
+## Shortening method names
 * s is set
 * g is get
 * b is backup
 * r is restore
 
-### Description of methods
+## Description of methods
 
-### System methods
+## System methods
 
-**sysInit**(operation) (9.8.{1-2})
+**sysInit**(operation) (9.8.{1-2} in Dahua manual)
 
-Accepts *reboot* and *shutdown* values. Reboot or shutdown the camera, depending on the value.
+Accepts *reboot* and *shutdown* values. Reboot or shutdown the camera, depending on the value.<hr>
 
 **sysInfo** (operation) (9.8.{3-10})
 Get system info.
@@ -42,28 +42,34 @@ GetVendor (5)
 GetSoftwareVersion(6)
 
 GetOnvifVersion (7) **Warning** return 400 if no Onvif version.
+<hr>
 
-### Management methods
+## Management methods
 
 **auth**() method is needed for the authentication. 
 You always need to start working with it and finish with the deauth method.
+<hr>
 
 **deauth**() method close connections. Always finish your work with the camera using this method.
+<hr>
 
 **bVideoInOptionsConfig**(filename). Backup data, recived gVideoInOptionsConfig() method as json in %filename%
 
-### Setting methods
+## Setting methods
 
 **sColor**(param, channel, config, value) (4.2.2 in Dahua manual)
 Method is used to set Brightness, Contrast, Hue, Saturation, TimeSection parametrs. You can use allias b, c, h, s and t.
+<hr>
 
-**sVideoInOptionsConfig**(channelNo, paramList) (4.3.3)
+**sVideoInOptionsConfig**(channelNo, params) (4.3.3)
 Allows setting the SetVideoInOptionsConfig parameters. 
 Example:
 ```
 sVideoInOptionsConfig(0, ("FlashControl", "Mode", "1"), ("Mirror", "true"), ("NormalOptions", "Rotate90", "1"), ("Flip", "false"))
 ```
 In 0 ChannelNo set FlashControl.Mode=1; Mirror=true; NormalOptions.Rotate90=1; Flip=false
+
+<hr>
 
 **sCurrentTime**(time)
 %time% is ***array*** of Y M D h m s
@@ -82,13 +88,14 @@ Possible errors:
 
 -> 3 -- wrong M D h m s format.
 
+<hr>
 
-**sBasicConfig**(paramList) (5.2.2)
+**sBasicConfig**(params) (5.2.2)
 A method that allows you to change the default network settings.
 ```
 Comment: interface is network interface name, such as eth0, eth1...
 ```
-paramList is tuples with two or three points inside:
+params is tuples with two or three points inside:
 2 parametrs: parametr, value.
 **ex: ("Domain", "dahua")**
 
@@ -104,7 +111,9 @@ But the correct request must be:
 "Network.DefaultInterface" (w in lower case).
 ```
 
-**sNTPConfig**(paramList) (5.8.2)
+<hr>
+
+**sNTPConfig**(params) (5.8.2)
 Set NTP config.
 
 **Example:**
@@ -114,7 +123,10 @@ mng.sNTPConfig(("Address", "pool.ntp.org"), ("TimeZone", "2"))
 ```
 Set Address="pool.ntp.org" and TimeZone=2
 
-**sRTSPConfig**(paramList) (5.8.2)
+
+<hr>
+
+**sRTSPConfig**(params) (5.8.2)
 Set RTSP config.
 
 ### ATTENTION!
@@ -140,6 +152,9 @@ mng.sRTSPConfig(("Enable", "true"))
 ```
 **If the server is started, the parameters will not be changed.**
 
+
+<hr>
+
 **sChannelTitleConfig**(channel, name) (4.7.2)
 Change %channel% title to %name%.
 
@@ -147,23 +162,27 @@ Change %channel% title to %name%.
 
 mng.sChannelTitleConfig("0", "Lorem ipsum dolor sit amet")
 
+<hr>
 
-**sMotionDetectConfig**(channelNo, paramList) (6.3.2)
+**sMotionDetectConfig**(channelNo, params) (6.3.2)
 Set motion detect config.
 
 **Example:**
 
 mng.sMotionDetectConfig("0", ("Enable", "true"), ("PtzManualEnable", "true"))
 
-**sBlindDetectConfig**(channelNo, paramList) (6.4.1)
+<hr>
+
+**sBlindDetectConfig**(channelNo, params) (6.4.1)
 Set blind detect config.
 
 **Example:**
 
 mng.sBlindDetectConfig("0", ("Enable", "true"))
 
+<hr>
 
-**sLocalesConfig**(paramList) (9.3.2)
+**sLocalesConfig**(params) (9.3.2)
 Set locales config.
 
 **Example:**
@@ -172,10 +191,11 @@ mng.sLocalesConfig(("DSTEnable", "true"))
 
 
 
-### Receiving methods
+## Receiving methods
 
 **gVideoInputCaps**(channel) (4.3.1 in Dahua manual)
 Get video input capabilities, *channelNo* is video in channel index.
+<hr>
 
 **gLocalesConfig**() (9.3.1)
 
@@ -187,8 +207,8 @@ print(mng.gLocalesConfig())
 
 ```
 {'DSTEnable': 'false', 'DSTEnd': {'Day': '0', 'Hour': '0', 'Minute': '0', 'Month': '10', 'Week': '-1', 'Year': '2020'}, 'DSTStart': {'Day': '0', 'Hour': '0', 'Minute': '0', 'Month': '3', 'Week': '-1', 'Year': '2020'}, 'TimeFormat': 'yyyy-MM-dd HH:mm:ss'}
-
 ```
+<hr>
 
 **gVideoInOptionsConfig**() (4.3.2)
 Video in options contain Backlight, ExposureSpeed, DayNightColor. DayOptions, NightOptions, NormalOptions and so on
@@ -207,8 +227,11 @@ q = {'0': {'AlarmDayNightColorMode': '0', 'AntiFlicker': '0', 'AutoSyncPhase': '
        'IrisAutoSensitivity': '50', 'Mirror': 'false', . . . }}
 
 ```
+<hr>
 
 **gMaxExtraStreamCounts**() (4.1.2) Does exactly what the title says.
+
+<hr>
 
 **gCurrentTime**() (9.2.1)
 
@@ -219,12 +242,17 @@ The output would be about this:
 {'full': '2020-05-18 19:42:46', 'Y': '2020', 'M': '05', 'D': '18', 'h': '19', 'm': '42', 's': '46'}
 ```
 Where %full% - full time in YMDhms format, %Y% - year, %M% - month, %D% - day, "h" - hour, "m" - minute, "s" - seconds 
+<hr>
 
 **gColor**() (4.2.1) return dict of **channelNo** dicts of **configNo** dicts of Brightness, Contrast, Hue, Saturation, TimeSection parametrs.
+
+<hr>
 
 **gSnapshot**(channel, filename) (4.1.3)
 Get snapshot of %channel% and save it in %filename%.
 %%channel%% can be 1,2,3 or 4.
+
+<hr>
 
 **gBasicConfig**() (5.2.1)
 Get the basic network setting.
@@ -234,6 +262,8 @@ Get the basic network setting.
 {'DefaultInterface': 'eth0', 'Domain': 'dahua', 'Hostname': 'IPC', 'eth0': {'DefaultGateway': '192.168.1.1', 'DhcpEnable': 'false', 'DnsServer': {'0': '8.8.8.8', '1': '8.8.4.4'}, 'EnableDhcpReservedIP': 'false', 'IPAddress': '192.168.1.2', 'MTU': '1500', 'PhysicalAddress': 'aa:bb:cc:dd:ee:ff', 'SubnetMask': '255.255.255.0'}}
 ```
 
+<hr>
+
 **gNTPConfig**() (5.8.1)
 Get NTP config
 
@@ -242,6 +272,8 @@ Get NTP config
 ```
 {'Address': 'pool.ntp.org', 'Enable': 'true', 'Port': '123', 'TimeZone': '6', 'UpdatePeriod': '10'}
 ```
+
+<hr>
 
 **gRTSPConfig**() (5.9.1)
 Get RTSP config.
@@ -254,6 +286,8 @@ table.RTSP.Port=554
 table.RTSP.RTP.EndPort=40000
 table.RTSP.RTP.StartPort=20000
 ```
+
+<hr>
 
 **gChannelTitleConfig**() (4.7.1)
 Gets the titles of all channels.
@@ -273,15 +307,20 @@ print(mng.gChannelTitleConfig())
 {'0': 'Lorem ipsum dolor sit amet'}
 ```
 
+<hr>
+
 **gMotionDetectConfig**() (6.3.2)
 Get current motion detect config:
 
 
 [Example output](https://pastebin.com/GVhNJ0vd) (Huge!)
 
+<hr>
 
 **gMotionDetectConfig**() (6.3.2)
 Get current motion detect config:
+
+<hr>
 
 **gBlindnDetectConfig**() (6.4.2)
 
@@ -289,7 +328,7 @@ Output same type as motion detect config
 
 
 
-### Hint
+## Hint
 
 All setting and receiving methods return response status code if response error (ex: return 401 if auth error)
 
