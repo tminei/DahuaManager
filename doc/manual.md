@@ -327,6 +327,22 @@ Get current motion detect config:
 Output same type as motion detect config
 
 
+## Othen methods
+
+**regMng**channel, target, window, mode, *p1p2) (work in process)
+
+Region manager.
+Help set regions.
+Target can be: motion (another coming soon)
+
+Mode can be: fill, clear.
+
+Fill mode - fill region from p1 to p2 (from top-left corner)
+
+Clear - clear region
+
+<hr>
+
 
 ## Hint
 
