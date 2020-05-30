@@ -6,7 +6,7 @@ from requests.auth import HTTPDigestAuth
 
 login = ""
 password = ""
-url = "http://"
+url = ""
 
 
 # s is set
@@ -230,6 +230,28 @@ class DahuaManager:
                     URL += "&MotionDetect[" + str(channelNo) + "]." + i[0] + "=" + i[1]
                 if len(i) == 3:
                     URL += "&MotionDetect[" + str(channelNo) + "]." + i[0] + "." + i[1] + "=" + i[2]
+            response = self.session.get(URL)
+            if response.status_code == 200:
+                return 0
+            else:
+                return response.status_code
+        else:
+            return 1
+
+    def sVideoWidgetConfig(self, channelNo, *params):
+        validParam = []
+        for param in params:
+            if type(param) is tuple:
+                validParam.append(param)
+        if len(validParam) > 0:
+            URL = self.url + "/cgi-bin/configManager.cgi?action=setConfig"
+            for i in validParam:
+                if len(i) == 2:
+                    URL += "&VideoWidget[" + str(channelNo) + "]." + i[0] + "=" + i[1]
+                if len(i) == 3:
+                    URL += "&VideoWidget[" + str(channelNo) + "]." + i[0] + "." + i[1] + "=" + i[2]
+                if len(i) == 4:
+                    URL += "&VideoWidget[" + str(channelNo) + "]." + i[0] + "." + i[1] + "." + i[2] + "=" + i[4]
             response = self.session.get(URL)
             if response.status_code == 200:
                 return 0
@@ -749,6 +771,101 @@ class DahuaManager:
         else:
             return response.status_code
 
+    def gVideoWidgetConfig(self):
+        VideoWidget = {}
+        response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=VideoWidget")
+        if response.status_code == 200:
+            raw = response.text.strip().splitlines()
+            for i in raw:
+                pretty = i[18:]
+                lvl0 = pretty[:pretty.find("]")]
+                pretty = pretty[pretty.find("]") + 2:]
+                try:
+                    len(VideoWidget[lvl0])
+                except:
+                    VideoWidget[lvl0] = {}
+                if pretty.count(".") == 0 and pretty.count("[") == 0:
+                    lvl1 = pretty[:pretty.find("=")]
+                    val = pretty[pretty.find("=") + 1:]
+                    try:
+                        len(VideoWidget[lvl0][lvl1])
+                    except:
+                        VideoWidget[lvl0][lvl1] = val
+                elif pretty.count(".") > 0:
+                    if pretty.count("[") == 0:
+                        lvl1 = pretty[:pretty.find(".")]
+                        lvl2 = pretty[pretty.find(".") + 1:pretty.find("=")]
+                        val = pretty[pretty.find("=") + 1:]
+                        try:
+                            len(VideoWidget[lvl0][lvl1])
+                        except:
+                            VideoWidget[lvl0][lvl1] = {}
+                        try:
+                            len(VideoWidget[lvl0][lvl1][lvl2])
+                        except:
+                            VideoWidget[lvl0][lvl1][lvl2] = val
+                    elif pretty.count("[") == 1:
+                        if pretty.find("]") > pretty.find("."):
+                            lvl1 = pretty[:pretty.find(".")]
+                            lvl2 = pretty[pretty.find(".") + 1:pretty.find("[")]
+                            lvl3 = pretty[pretty.find("[") + 1:pretty.find("]")]
+                            val = pretty[pretty.find("=") + 1:]
+                            try:
+                                len(VideoWidget[lvl0][lvl1])
+                            except:
+                                VideoWidget[lvl0][lvl1] = {}
+                            try:
+                                len(VideoWidget[lvl0][lvl1][lvl2])
+                            except:
+                                VideoWidget[lvl0][lvl1][lvl2] = {}
+                            try:
+                                len(VideoWidget[lvl0][lvl1][lvl2][lvl3])
+                            except:
+                                VideoWidget[lvl0][lvl1][lvl2][lvl3] = val
+                        else:
+                            lvl1 = pretty[:pretty.find("[")]
+                            lvl2 = pretty[pretty.find("[") + 1:pretty.find("]")]
+                            lvl3 = pretty[pretty.find(".") + 1:pretty.find("=")]
+                            val = pretty[pretty.find("=") + 1:]
+                            try:
+                                len(VideoWidget[lvl0][lvl1])
+                            except:
+                                VideoWidget[lvl0][lvl1] = {}
+                            try:
+                                len(VideoWidget[lvl0][lvl1][lvl2])
+                            except:
+                                VideoWidget[lvl0][lvl1][lvl2] = {}
+                            try:
+                                len(VideoWidget[lvl0][lvl1][lvl2][lvl3])
+                            except:
+                                VideoWidget[lvl0][lvl1][lvl2][lvl3] = val
+                    else:
+                        lvl1 = pretty[:pretty.find("[")]
+                        lvl2 = pretty[pretty.find("[") + 1:pretty.find("]")]
+                        subpretty = pretty[pretty.find("."):pretty.find("=")]
+                        val = pretty[pretty.find("=") + 1:]
+                        lvl3 = subpretty[subpretty.find(".") + 1:subpretty.find("[")]
+                        lvl4 = subpretty[subpretty.find("[") + 1:subpretty.find("]")]
+                        try:
+                            len(VideoWidget[lvl0][lvl1])
+                        except:
+                            VideoWidget[lvl0][lvl1] = {}
+                        try:
+                            len(VideoWidget[lvl0][lvl1][lvl2])
+                        except:
+                            VideoWidget[lvl0][lvl1][lvl2] = {}
+                        try:
+                            len(VideoWidget[lvl0][lvl1][lvl2][lvl3])
+                        except:
+                            VideoWidget[lvl0][lvl1][lvl2][lvl3] = {}
+                        try:
+                            len(VideoWidget[lvl0][lvl1][lvl2][lvl3][lvl4])
+                        except:
+                            VideoWidget[lvl0][lvl1][lvl2][lvl3][lvl4] = val
+            return VideoWidget
+        else:
+            return response.status_code
+
     def gBlindDetectConfig(self):
         blindConfig = {}
         response = self.session.get(self.url + "/cgi-bin/configManager.cgi?action=getConfig&name=BlindDetect")
@@ -906,7 +1023,8 @@ class DahuaManager:
                 p1p2[1]) == 2 and len(p1p2[0]) == 2:
             p1 = p1p2[0]
             p2 = p1p2[1]
-            if int(p1[0]) > 17 or int(p1[1]) > 21 or int(p1[0]) < 0 or int(p1[1]) < 0 or int(p2[0]) > 17 or int(p2[1]) > 21 or int(p2[0]) < 0 or int(p2[1]) < 0:
+            if int(p1[0]) > 17 or int(p1[1]) > 21 or int(p1[0]) < 0 or int(p1[1]) < 0 or int(p2[0]) > 17 or int(
+                    p2[1]) > 21 or int(p2[0]) < 0 or int(p2[1]) < 0:
                 return 2
             else:
 
@@ -918,8 +1036,12 @@ class DahuaManager:
                 for j in range(p1[1], p2[1]):
                     if target == "motion":
                         if mode == "fill":
+                            URL += "&MotionDetect[{0}].MotionDetectWindow[{1}].Region[{2}]={3}".format(channel, window,
+                                                                                                       j, powsum)
+                        elif mode == "remove":
+                            URL += "&MotionDetect[{0}].MotionDetectWindow[{1}].Region[{2}]={3}".format(channel, window,
+                                                                                                       j, 0)
 
-                            URL += "&MotionDetect[{0}].MotionDetectWindow[{1}].Region[{2}]={3}".format(channel, window, j, powsum)
         elif mode == "clear":
             for k in range(0, 18):
                 URL += "&MotionDetect[{0}].MotionDetectWindow[{1}].Region[{2}]=0".format(channel, window, k)
@@ -933,5 +1055,12 @@ class DahuaManager:
 
 mng = DahuaManager()
 mng.auth()
-mng.regMng(0, "motion", 0, "clear")
-mng.regMng(0, "motion", 0, "fill", (0, 3), (10, 10))
+# mng.regMng(0, "motion", 0, "clear")
+# mng.regMng(0, "motion", 0, "fill", (0, 3), (10, 10))
+# while True:
+#     mng.sChannelTitleConfig("0", time.time())
+#     time.sleep(1)
+mng.sVideoWidgetConfig("0", ("CustomTitle[0]", "Text", "0|1|1|1|1"), ("CustomTitle[1]", "TextAlign", "1"),("CustomTitle[1]", "Rect[0]", "5319"), ("CustomTitle[1]", "Rect[1]", "7445"), ("CustomTitle[1]", "Rect[3]", "7929"),("CustomTitle[1]", "Rect[4]", "7862"))
+mng.gSnapshot("0", "test.png")
+print(mng.gVideoWidgetConfig())
+mng.deauth()
