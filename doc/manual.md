@@ -61,6 +61,15 @@ You always need to start working with it and finish with the deauth method.
 Method is used to set Brightness, Contrast, Hue, Saturation, TimeSection parametrs. You can use allias b, c, h, s and t.
 <hr>
 
+
+**sVideoWidgetConfig**(channelNo, params) (4.9.1)
+
+Example: 
+```mng.sVideoWidgetConfig("0", ("CustomTitle[0]", "Text", "0|1|1|1|1"), ("CustomTitle[1]", "TextAlign", "1"),("CustomTitle[1]", "Rect[0]", "5319"), ("CustomTitle[1]", "Rect[1]", "7445"), ("CustomTitle[1]", "Rect[3]", "7929"),("CustomTitle[1]", "Rect[4]", "7862"))```
+Set Title text in right bot corner to "0|1|1|1|1"
+
+<hr>
+
 **sVideoInOptionsConfig**(channelNo, params) (4.3.3)
 Allows setting the SetVideoInOptionsConfig parameters. 
 Example:
@@ -196,6 +205,12 @@ mng.sLocalesConfig(("DSTEnable", "true"))
 **gVideoInputCaps**(channel) (4.3.1 in Dahua manual)
 Get video input capabilities, *channelNo* is video in channel index.
 <hr>
+
+**gVideoWidgetConfig**(4.9.2)
+Get video widget config
+<hr>
+
+
 
 **gLocalesConfig**() (9.3.1)
 
